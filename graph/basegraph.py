@@ -1,7 +1,6 @@
 from graph.node import Node
 
 from math import inf
-from queue import Queue
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -36,10 +35,10 @@ class BaseGraph:
     def get_edge_cost(self, node_a: Node, node_b: Node) -> float:
 
         final_cost: float = inf
-        node_a_edges: list = self.graph[node_a.name]
+        node_a_edges: list[(str, int)] = self.graph[node_a.name]
 
-        for (node, cost) in node_a_edges:
-            if node_a == node_b:
+        for (node_name, cost) in node_a_edges:
+            if Node(node_name) == node_b:
                 final_cost = cost
 
         return final_cost
@@ -51,6 +50,17 @@ class BaseGraph:
 
         while idx + 1 < len(path):
             cost = cost + self.get_edge_cost(path[idx], path[idx + 1])
+            idx += 1
+
+        return cost
+
+    def get_path_cost_by_name(self, path: list[str]) -> float:
+
+        cost: float = 0
+        idx: int = 0
+
+        while idx + 1 < len(path):
+            cost = cost + self.get_edge_cost(Node(path[idx]), Node(path[idx + 1]))
             idx += 1
 
         return cost
@@ -73,6 +83,14 @@ class BaseGraph:
                 edges = edges + f"{node_a}---{node_cost}---{node_b}\n"
 
         return edges
+
+    def get_node_neighbours(self, node: Node):
+        neighbours: list = []
+
+        for (adjacent, weight) in self.graph[node.name]:
+            neighbours.append((adjacent, weight))
+
+        return neighbours
 
     def draw(self):
         graph_as_nx = nx.Graph()
