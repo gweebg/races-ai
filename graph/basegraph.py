@@ -11,6 +11,7 @@ class BaseGraph:
     def __init__(self, is_directed: bool = False):
         self.nodes: list[Node] = []  # List of every existing node.
         self.graph = {}  # Dictionary containing the graph itself.
+        self.heuristics = {}  # Dictionary containing node heuristics.
         self.is_directed = is_directed
 
     def add_edge(self, node_a: Node, node_b: Node, cost: int) -> None:
@@ -91,6 +92,42 @@ class BaseGraph:
             neighbours.append((adjacent, weight))
 
         return neighbours
+
+    def get_node_neighbours_by_name(self, node_name: str):
+        neighbours: list = []
+
+        for (adjacent, weight) in self.graph[node_name]:
+            neighbours.append((adjacent, weight))
+
+        return neighbours
+
+    def add_node_heuristic(self, node_name: str, estimate: int):
+        node: Node = Node(node_name)
+        if node in self.nodes:
+            self.heuristics[node_name] = estimate
+
+    def set_default_heuristic(self, estimate: int):
+        for node in self.graph.keys():
+            self.heuristics[node] = estimate
+
+    def get_node_heuristic(self, node_name: str):
+        if node_name not in self.heuristics.keys():
+            raise KeyError(f"Node '{node_name}' does not exist. (get_node_heuristic)")
+        else:
+            return self.heuristics[node_name]
+
+    @staticmethod
+    def calculate_estimate(estimate):
+        estimate_list = list(estimate.keys())
+        min_estimate = estimate[estimate_list[0]]
+        node = estimate_list[0]
+
+        for key, value in estimate.items():
+            if value < min_estimate:
+                min_estimate = value
+                node = key
+
+        return node
 
     def draw(self):
         graph_as_nx = nx.Graph()

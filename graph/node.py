@@ -4,16 +4,15 @@ class Node:
     Each node has a name, id (optional) and heuristic value (optional).
     """
 
-    def __init__(self, name: str, node_heuristic: int = -1, node_id: int = -1):
+    def __init__(self, name: str, node_id: int = -1):
         self.id = node_id
-        self.heuristic = node_heuristic
         self.name = name
 
     def __repr__(self):
-        return f'Node(id = {self.id}, name = {self.name}, h = {self.heuristic})'
+        return f'Node(id = {self.id}, name = {self.name})'
 
     def __str__(self):
-        return f'Node(id = {self.id}, name = {self.name}, heuristic = {self.heuristic})'
+        return f'Node(id = {self.id}, name = {self.name})'
 
     def __eq__(self, other: 'Node'):
         # Two nodes are the same if their name is the same.

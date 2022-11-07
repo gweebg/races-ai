@@ -15,10 +15,20 @@ def main():
     graph.add_edge(Node("Elvas"), Node("Arraiolos"), 50)
     graph.add_edge(Node("Arraiolos"), Node("Lisboa"), 90)
 
+    graph.add_node_heuristic("Elvas", 10)
+    graph.add_node_heuristic("Borba", 20)
+    graph.add_node_heuristic("Estremoz", 15)
+    graph.add_node_heuristic("Evora", 5)
+    graph.add_node_heuristic("Montemor", 35)
+    graph.add_node_heuristic("Vendas Novas", 15)
+    graph.add_node_heuristic("Arraiolos", 35)
+    graph.add_node_heuristic("Lisboa", 25)
+
     # print(graph)
     # print(graph.get_edge_cost(Node("Elvas"), Node("Arraioklos")))
     # print(graph.get_path_cost([Node("Elvas"), Node("Arraiolos"), Node("Lisboa")]))
-    print(graph.bfs_search("Elvas", "Lisboa"))
+    # print(graph.bfs_search("Elvas", "Lisboa"))
+    print(graph.astar_search("Elvas", "Lisboa"))
 
     graph.draw()
 
