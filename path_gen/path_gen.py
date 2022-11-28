@@ -1,6 +1,7 @@
 from graph.searchgraph import SearchGraph
 from enum import Enum
 from graph.node import Node
+from parser.parser import MapPiece
 import copy
 
 
@@ -54,29 +55,9 @@ class Car:
         self.update()
 
 
-class Piece(Enum):
-    TRACK = 0
-    OUTSIDE_TRACK = 1
-    INIT = 2
-    END = 3
-
-    def is_inside_track(self):
-        match self:
-            case Piece.TRACK, Piece.END, Piece.INIT:
-                return True
-            case _:
-                return False
-
-    def travel_cost(self, other):
-        if other.is_inside_track():
-            return 1
-        else:
-            return 25
-
-
 class CircuitNode:
     car: Car
-    piece: Piece
+    piece: MapPiece
 
     def __init__(self, car, piece):
         self.car = car
