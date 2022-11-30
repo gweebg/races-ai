@@ -1,5 +1,6 @@
 from graph.graph import Graph
 from parser.parser import MapPiece
+from collections import deque
 import copy
 
 
@@ -100,29 +101,30 @@ def is_out_of_bounds(car, circuit_x, circuit_y):
 def generate_player_graph(circuit, init_pos_x, init_pos_y):
     g = Graph(True)
     car = Car(pos_x=init_pos_x, pos_y=init_pos_y)
-    start_node = CircuitNode(car, circuit[init_pos_x][init_pos_y])
-    open_list = [start_node]
+    start_node = CircuitNode(car, circuit[init_pos_y][init_pos_x])
+    open_queue = deque()
+    open_queue.append(start_node)
     closed_set = set()
 
-    while len(open_list) > 0:
+    while len(open_queue) > 0:
         #  print("open_list: ", len(open_list), " closed_set: ", len(closed_set))
-        node = open_list.pop()
+        node = open_queue.popleft()
         if node in closed_set:
             continue
 
         next_node_paths = expand_track_moves(circuit, node)
 
-        for (start_node, last_node, is_crashed, crash_node) in next_node_paths:
+        for (s_node, last_node, is_crashed, crash_node) in next_node_paths:
             cost = 25 if is_crashed else 1
-            g.add_edge(node, start_node, cost)
+            g.add_edge(node, s_node, cost)
             if crash_node is not None:
-                g.add_edge(start_node, crash_node, 0)
+                g.add_edge(s_node, crash_node, 0)
                 g.add_edge(crash_node, last_node, 0)
             else:
-                g.add_edge(start_node, last_node, 0)
+                g.add_edge(s_node, last_node, 0)
 
             if last_node not in closed_set:
-                open_list.append(last_node)
+                open_queue.append(last_node)
 
         closed_set.add(node)
 
@@ -173,6 +175,8 @@ def get_node_path(circuit, node):
 
 
 def expand_track_moves(circuit, c_node: CircuitNode):
+    if c_node.piece is MapPiece.FINISH:
+        return []
     list_paths = []
 
     node = copy.deepcopy(c_node)

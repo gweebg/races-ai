@@ -62,7 +62,7 @@ class Graph:
     def add_heuristic(self, val, heur):
         self.heur[val] = heur
 
-    def dfs(self, start, end, path=None, visited=None) -> tuple[list, int] | None:
+    def dfs(self, start, end, comp_function, path=None, visited=None) -> tuple[list, int] | None:
         if visited is None:
             visited = set()
         if path is None:
@@ -71,18 +71,18 @@ class Graph:
         path.append(start)
         visited.add(start)
 
-        if start == end:
+        if comp_function(start, end):
             custo = self.path_cost(path)
             return path, custo
         for (adjacente, pesos) in self.graph[start].items():
             if adjacente not in visited:
-                resultado = self.dfs(adjacente, end, path, visited)
+                resultado = self.dfs(adjacente, end, comp_function, path, visited)
                 if resultado is not None:
                     return resultado
         path.pop()
         return None
 
-    def bfs(self, start, end) -> tuple[list, int] | None:
+    def bfs(self, start, end, comp_function) -> tuple[list, int] | None:
         visited = set()
         fila = Queue()
 
@@ -95,10 +95,10 @@ class Graph:
         path_found = False
         while not fila.empty() and path_found is False:
             nodo_atual = fila.get()
-            if nodo_atual == end:
+            if comp_function(nodo_atual, end):
                 path_found = True
             else:
-                for (adjacente, peso) in self.graph[nodo_atual]:
+                for (adjacente, peso) in self.graph[nodo_atual].items():
                     if adjacente not in visited:
                         fila.put(adjacente)
                         parent[adjacente] = nodo_atual
@@ -216,11 +216,10 @@ class Graph:
         # Converter para o formato usado pela biblioteca networkx
         for nodo in lista_v:
             g.add_node(nodo)
-            for (adjacente, pesos) in self.graph[nodo].items():
+            for (adjacente, peso) in self.graph[nodo].items():
                 lista = (nodo, adjacente)
                 # lista_a.append(lista)
-                for peso in pesos:
-                    g.add_edge(nodo, adjacente, weight=peso)
+                g.add_edge(nodo, adjacente, weight=peso)
 
         # desenhar o grafo
         pos = nx.spring_layout(g)
