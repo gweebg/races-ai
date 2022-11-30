@@ -42,12 +42,12 @@ from enum import Enum
 class MapPiece(Enum):
     TRACK = 0
     OUTSIDE_TRACK = 1
-    INIT = 2
-    END = 3
+    START = 2
+    FINISH = 3
 
     def is_inside_track(self):
         match self:
-            case MapPiece.TRACK, MapPiece.END, MapPiece.INIT:
+            case MapPiece.TRACK | MapPiece.FINISH | MapPiece.START:
                 return True
             case _:
                 return False
@@ -67,31 +67,38 @@ class MapPiece(Enum):
             return MapPiece.TRACK
 
         if char == 'P':
-            return MapPiece.INIT
+            return MapPiece.START
 
         if char == 'F':
-            return MapPiece.END
+            return MapPiece.FINISH
 
 
 def parse_map(path_to_map: str):
-    result_map = {}
+    result_list = []
+    start_pos = None
+    finish_pos_list = []
 
     with open(path_to_map, "r") as map_file:
         lines = map_file.readlines()
 
     current_line = 0
-    current_char = 0
-
     for line in lines:
         line = line.replace('\n', '').replace(' ', '')
-
+        current_char = 0
+        result_list.append([])
         for char in line:
-            result_map[(current_char, current_line)] = MapPiece.match_char(char)
+            piece = MapPiece.match_char(char)
+            if piece is MapPiece.START:
+                start_pos = (current_char, current_line)
+            if piece is MapPiece.FINISH:
+                finish_pos_list.append((current_char, current_line))
+
+            result_list[current_line].append(piece)
             current_char += 1
 
         current_line += 1
 
-    return result_map
+    return result_list, start_pos, finish_pos_list
 
 # def main():
 #     result_map = parse_map('/home/guilherme/Documents/repos/races-ai/docs/map_a.txt')
