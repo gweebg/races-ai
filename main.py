@@ -8,7 +8,7 @@ def compare_circuit_nodes(val1, val2):
 
 
 def main():
-    circuit, start_pos, finish_pos_list = parse_map("map_a.txt")
+    circuit, start_pos, finish_pos_list = parse_map("docs/map_a.txt")
     graph = generate_player_graph(circuit, start_pos[0], start_pos[1])
     st = CircuitNode(Car(pos_x=start_pos[0], pos_y=start_pos[1]), circuit[start_pos[1]][start_pos[0]])
     f_pos = finish_pos_list[2]
