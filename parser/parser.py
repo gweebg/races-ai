@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 # class MapObjectType(Enum):
 #     WALL = 0
 #     START = 1
@@ -36,9 +39,41 @@
 #     def __repr__(self):
 #         return f"{self.type.name}.{self.x}.{self.y}"
 
+class MapPiece(Enum):
+    TRACK = 0
+    OUTSIDE_TRACK = 1
+    INIT = 2
+    END = 3
+
+    def is_inside_track(self):
+        match self:
+            case MapPiece.TRACK, MapPiece.END, MapPiece.INIT:
+                return True
+            case _:
+                return False
+
+    def travel_cost(self, other):
+        if other.is_inside_track():
+            return 1
+        else:
+            return 25
+
+    @classmethod
+    def match_char(cls, char) -> 'MapPiece':
+        if char == 'X':
+            return MapPiece.OUTSIDE_TRACK
+
+        if char == '-':
+            return MapPiece.TRACK
+
+        if char == 'P':
+            return MapPiece.INIT
+
+        if char == 'F':
+            return MapPiece.END
+
 
 def parse_map(path_to_map: str):
-
     result_map = {}
 
     with open(path_to_map, "r") as map_file:
@@ -51,13 +86,12 @@ def parse_map(path_to_map: str):
         line = line.replace('\n', '').replace(' ', '')
 
         for char in line:
-            result_map[(current_char, current_line)] = char
+            result_map[(current_char, current_line)] = MapPiece.match_char(char)
             current_char += 1
 
         current_line += 1
 
     return result_map
-
 
 # def main():
 #     result_map = parse_map('/home/guilherme/Documents/repos/races-ai/docs/map_a.txt')
