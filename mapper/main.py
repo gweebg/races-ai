@@ -6,6 +6,8 @@ from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 
 from mapper.tiles import TileMap
+from parser.parser import parse_map
+from path_gen.path_gen import generate_player_graph, CircuitNode, Car
 
 # Console pretty printer. #
 
@@ -13,8 +15,9 @@ console = Console()
 
 # Important constants. #
 
-maps = '/home/guilherme/Documents/repos/races-ai/docs/maps'
-available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
+maps = '../docs/maps'
+# available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
+available_algorithms = ["DFS"]
 
 
 # Returns a list containing every map file in the provided path.
@@ -26,7 +29,7 @@ def get_maps(maps_path: str) -> list[str]:
 
 
 # Greets the user and asks him to choose the map to simulate on.
-def main_menu() -> TileMap:
+def main_menu() -> tuple[TileMap, str]:
     console.print("[bold]\nWelcome to Vector Race Minecraft Map Simulator or [cyan]VRMMP[/] for short![/]")
     console.print("[bold]Choose a [red]map[/] from the ones listed bellow![/]")
 
@@ -36,23 +39,21 @@ def main_menu() -> TileMap:
 
     chosen_map = IntPrompt.ask("[bold]I want map [red]number[/][/]", choices=[str(num) for num in range(len(map_list))])
 
-    return TileMap(maps + f"/{map_list[chosen_map]}", None)
+    return TileMap(maps + f"/{map_list[chosen_map]}", None), f"{maps}/{map_list[chosen_map]}"
 
 
 # Ask the user which algorithm he wants to use.
 def prompt_algorithm() -> str:
-
     console.print("\n[bold]Which [cyan]algorithm[/] do you want to use ?[/]")
 
     for i, algo in enumerate(available_algorithms):
         console.print(f"  [bold cyan]{i}.[/] {algo}")
 
     algorithm = Prompt.ask("[bold]I choose[/]", choices=[str(num) for num in range(len(available_algorithms))])
-    return algorithm
+    return available_algorithms[int(algorithm)]
 
 
 def prompt_simulate() -> int:
-
     console.print("\n[bold]Please [red]choose[/] what to do![/]")
 
     console.print("  [bold cyan]0.[/] Run graphic interface.")
@@ -64,8 +65,7 @@ def prompt_simulate() -> int:
     return option
 
 
-def run_graphical(my_map: TileMap, algorithm: str):
-
+def run_graphical(my_map: TileMap, path: list[tuple[int,int]]):
     # Setting game variables. #
 
     pygame.init()
@@ -79,7 +79,7 @@ def run_graphical(my_map: TileMap, algorithm: str):
 
     # Starting game loop. #
 
-    path = [(9, 2), (8, 3), (7, 3), (6, 4), (6, 5), (6, 6), (7, 7), (8, 8), (9, 9), (9, 10)]
+    # path = [(9, 2), (8, 3), (7, 3), (6, 4), (6, 5), (6, 6), (7, 7), (8, 8), (9, 9), (9, 10)]
     path_counter = 0
     path_length = len(path)
 
@@ -125,21 +125,67 @@ def run_graphical(my_map: TileMap, algorithm: str):
         pygame.display.update()
 
 
+def compare_circuit_nodes(val1, val2):
+    return val1.car.pos_x == val2.car.pos_x and val1.car.pos_y == val2.car.pos_y
+
+
+def path_coordinates(path):
+    coord_list = []
+
+    for i in range(1, len(path)):
+        node1 = path[i-1]
+        node2 = path[i]
+        nx = node1.car.pos_x
+        ny = node1.car.pos_y
+        endx = node2.car.pos_x
+        endy = node2.car.pos_y
+        xdir = max(-1, min(node2.car.pos_x - node1.car.pos_x, 1))
+        ydir = max(-1, min(node2.car.pos_y - node1.car.pos_y, 1))
+
+        coord_list.append((nx + 1, ny + 1))
+        while nx != endx or ny != endy:
+            if nx != endx:
+                nx += xdir
+            if ny != endy:
+                ny += ydir
+
+            coord_list.append((nx + 1, ny + 1))
+
+    return coord_list
+
 # Run the simulation.
 def main():
-
-    my_map: TileMap = main_menu()  # Load the Map via console prompt.
+    my_map, map_path = main_menu()  # Load the Map via console prompt.
     algorithm: str = prompt_algorithm()  # Get which algorithm to use on the path.
+
+    circuit, start_pos, finish_pos_list = parse_map(map_path)
+    graph = generate_player_graph(circuit, start_pos[0], start_pos[1])
+
+    st = CircuitNode(Car(pos_x=start_pos[0], pos_y=start_pos[1]), circuit[start_pos[1]][start_pos[0]])
+    f_pos = finish_pos_list[2]
+    end = CircuitNode(Car(pos_x=f_pos[0], pos_y=f_pos[1]), circuit[f_pos[1]][f_pos[0]])
+
+    if algorithm == 'DFS':
+        path, cost = graph.dfs(st, end, compare_circuit_nodes)
+
+    path = path_coordinates(path)
 
     console.print("[bold green]\nFinished setting up the simulation![/]")
 
     next_action = prompt_simulate()
 
     if next_action == 0:
-        run_graphical(my_map, algorithm)
+        run_graphical(my_map, path)
 
-    if next_action in [1, 2]:
+    if next_action == 1:
+        console.print("Found this path:")
+        console.print(path)
+        console.print(f"[bold]With the [green]cost[/] of: [yellow]{cost}[/][/]")
+        SystemExit(1)
+
+    if next_action == 2:
         console.print("[bold red]Not yet implemented.[/]")
+        SystemExit(1)
 
     if next_action == 3:
         SystemExit(1)
@@ -147,5 +193,3 @@ def main():
 
 if __name__ == "__main__":
     SystemExit(main())
-
-
