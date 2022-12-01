@@ -15,7 +15,7 @@ console = Console()
 
 # Important constants. #
 
-maps = '../docs/maps'
+maps = './docs/maps'
 # available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
 available_algorithms = ["DFS"]
 
@@ -171,24 +171,26 @@ def main():
     path = path_coordinates(path)
 
     console.print("[bold green]\nFinished setting up the simulation![/]")
+    running = True
 
-    next_action = prompt_simulate()
 
-    if next_action == 0:
-        run_graphical(my_map, path)
+    while running:
+        next_action = prompt_simulate()
 
-    if next_action == 1:
-        console.print("Found this path:")
-        console.print(path)
-        console.print(f"[bold]With the [green]cost[/] of: [yellow]{cost}[/][/]")
-        SystemExit(1)
+        if next_action == 0:
+            run_graphical(my_map, path)
+            running = False
 
-    if next_action == 2:
-        console.print("[bold red]Not yet implemented.[/]")
-        SystemExit(1)
+        if next_action == 1:
+            console.print("Found this path:")
+            console.print(path)
+            console.print(f"[bold]With the [green]cost[/] of: [yellow]{cost}[/][/]")
 
-    if next_action == 3:
-        SystemExit(1)
+        if next_action == 2:
+            console.print("[bold red]Not yet implemented.[/]")
+
+        if next_action == 3:
+            running = False
 
 
 if __name__ == "__main__":
