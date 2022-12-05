@@ -16,7 +16,8 @@ console = Console()
 
 # Important constants. #
 
-maps = './docs/maps'
+# maps = './docs/maps'
+maps = '/home/guilherme/PycharmProjects/races-ai/docs/maps'
 # available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
 available_algorithms = ["DFS"]
 

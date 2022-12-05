@@ -69,28 +69,32 @@ class TileMap:
 
                 elif tile == 'X':
                     tiles.append(Tile(
-                        './docs/grass-ico.jpg',
+                        # './docs/grass-ico.jpg',
+                        '/home/guilherme/PycharmProjects/races-ai/docs/grass-ico.jpg',
                         x * self.tile_size,
                         y * self.tile_size,
                         self.spritesheet))
 
                 elif tile == '-':
                     tiles.append(Tile(
-                        './docs/cobblestone-ico.png',
+                        # './docs/cobblestone-ico.png',
+                        '/home/guilherme/PycharmProjects/races-ai/docs/cobblestone-ico.png',
                         x * self.tile_size,
                         y * self.tile_size,
                         self.spritesheet))
 
                 elif tile == 'P':
                     tiles.append(Tile(
-                        './docs/redstone-block-ico.png',
+                        # './docs/redstone-block-ico.png',
+                        '/home/guilherme/PycharmProjects/races-ai/docs/redstone-block-ico.png',
                         x * self.tile_size,
                         y * self.tile_size,
                         self.spritesheet))
 
                 elif tile == 'F':
                     tiles.append(Tile(
-                        './docs/gold-block-ico.png',
+                        # './docs/gold-block-ico.png',
+                        '/home/guilherme/PycharmProjects/races-ai/docs/gold-block-ico.png',
                         x * self.tile_size,
                         y * self.tile_size,
                         self.spritesheet))

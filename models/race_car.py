@@ -16,7 +16,7 @@ class Coordinates(BaseModel):
         return self.x == other.x and self.y == other.y
 
     def __hash__(self):
-        return hash(self.x + self.y + int(f'{self.x}{self.y}'))
+        return hash((self.x * 0x1f1f1f1f) ^ self.y)
 
 
 class RaceCar:
@@ -32,10 +32,7 @@ class RaceCar:
         self.acc: Coordinates = acc
 
     def __eq__(self, other: 'RaceCar'):
-        return (self.pos == other.pos) and (self.vel == other.pos) and (self.acc == other.acc)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        return (self.pos == other.pos) and (self.vel == other.vel) and (self.acc == other.acc)
 
     def update(self):
         """
