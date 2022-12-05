@@ -55,8 +55,16 @@ class Graph:
 
         return cost
 
+    def get_neighbours(self, nodo) -> list:
+        lista = []
+        for (adjacente, peso) in self.graph[nodo].items():
+            lista.append((adjacente, peso))
+        return lista
+
     def add_heuristic(self, val, heur):
         self.heur[val] = heur
+
+    # Search Functions #
 
     def dfs_search(self, start_node, end_node_list, path=None, visited=None) -> Optional[tuple[list, int]]:
 
@@ -129,12 +137,6 @@ class Graph:
             cost = self.path_cost(path)
 
         return path, cost
-
-    def get_neighbours(self, nodo) -> list:
-        lista = []
-        for (adjacente, peso) in self.graph[nodo].items():
-            lista.append((adjacente, peso))
-        return lista
 
     def greedy(self, start, end) -> tuple[list, int] | None:
         open_list = {start}
@@ -222,23 +224,21 @@ class Graph:
         return None
 
     def draw(self):
-        lista_v = self.graph.keys()
-        lista_a = []
-        g = nx.Graph()
 
-        # Converter para o formato usado pela biblioteca networkx
-        for nodo in lista_v:
-            g.add_node(nodo)
-            for (adjacente, peso) in self.graph[nodo].items():
-                lista = (nodo, adjacente)
-                # lista_a.append(lista)
-                g.add_edge(nodo, adjacente, weight=peso)
+        nodes = self.graph.keys()
+        graph = nx.Graph()
 
-        # desenhar o grafo
-        pos = nx.spring_layout(g)
-        nx.draw_networkx(g, pos, with_labels=True, font_weight='bold')
-        labels = nx.get_edge_attributes(g, 'weight')
-        nx.draw_networkx_edge_labels(g, pos, edge_labels=labels)
+        for node in nodes:
+            graph.add_node(node)
+
+            for (adjacent_node, weight) in self.graph[node].items():
+                graph.add_edge(node, adjacent_node, weight=weight)
+
+        layout = nx.spring_layout(graph)
+        nx.draw_networkx(graph, layout, with_labels=True, font_weight='bold')
+
+        labels = nx.get_edge_attributes(graph, 'weight')
+        nx.draw_networkx_edge_labels(graph, layout, edge_labels=labels)
 
         plt.draw()
         plt.show()

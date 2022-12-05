@@ -226,7 +226,8 @@ def main():
             console.print(f"[bold]With the [green]cost[/] of: [yellow]{cost}[/][/]")
 
         if next_action == 2:
-            console.print("[bold red]Not yet implemented.[/]")
+            console.print(f"[bold red]The larger the map the larger the graph will be, please be patient...")
+            graph.draw()
 
         if next_action == 3:
             running = False
