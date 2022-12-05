@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f5ce33f-0895-4c84-bfcf-2b33b70c7ec4" name="Changes" comment="It is working once again :)">
+    <list default="true" id="8f5ce33f-0895-4c84-bfcf-2b33b70c7ec4" name="Changes" comment="Added progress bar to interface.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/graph/graph.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph/graph.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mapper/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapper/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/path_gen/path_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/path_gen/path_gen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,7 +161,7 @@
       <workItem from="1670252947533" duration="25000" />
       <workItem from="1670252985663" duration="2546000" />
       <workItem from="1670257359139" duration="260000" />
-      <workItem from="1670270435685" duration="5125000" />
+      <workItem from="1670270435685" duration="6278000" />
     </task>
     <task id="LOCAL-00001" summary="Pronto para entrega 1.">
       <created>1669853788327</created>
@@ -192,7 +191,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670272225829</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added progress bar to interface.">
+      <created>1670275565396</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1670275565396</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -214,7 +220,8 @@
     <MESSAGE value="Pronto para entrega 1.1" />
     <MESSAGE value="Needs debugging!" />
     <MESSAGE value="It is working once again :)" />
-    <option name="LAST_COMMIT_MESSAGE" value="It is working once again :)" />
+    <MESSAGE value="Added progress bar to interface." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added progress bar to interface." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/races_ai$parser.coverage" NAME="parser Coverage Results" MODIFIED="1669636059840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/parser" />

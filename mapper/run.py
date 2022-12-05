@@ -20,7 +20,7 @@ console = Console()
 # maps = './docs/maps'
 maps = '/home/guilherme/PycharmProjects/races-ai/docs/maps'
 # available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
-available_algorithms = ["DFS"]
+available_algorithms = ["DFS", "BFS"]
 
 
 # Returns a list containing every map file in the provided path.
@@ -197,6 +197,9 @@ def main():
             if algorithm == 'DFS':
                 path, cost = graph.dfs_search(starting_node, finish_nodes)
 
+            if algorithm == 'BFS':
+                path, cost = graph.bfs_search(starting_node, finish_nodes)
+
             progress.update(task, advance=20)
 
             path = path_coordinates(path)
@@ -206,6 +209,7 @@ def main():
             progress.stop_task(task)
 
     # Diplay options from computed path. #
+
     console.print("\n", end='')
     running = True
 
@@ -235,5 +239,5 @@ if __name__ == "__main__":
 """
 Interface To-Do List:
 - Add block variations.
-- Add loading bar.
+Done - Add loading bar.
 """

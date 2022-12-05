@@ -58,26 +58,6 @@ class Graph:
     def add_heuristic(self, val, heur):
         self.heur[val] = heur
 
-    def dfs(self, start, end, path=None, visited=None) -> tuple[list, int] | None:
-        if visited is None:
-            visited = set()
-        if path is None:
-            path = []
-
-        path.append(start)
-        visited.add(start)
-
-        if start == end:
-            custo = self.path_cost(path)
-            return path, custo
-        for (adjacente, pesos) in self.graph[start].items():
-            if adjacente not in visited:
-                resultado = self.dfs(adjacente, end, path, visited)
-                if resultado is not None:
-                    return resultado
-        path.pop()
-        return None
-
     def dfs_search(self, start_node, end_node_list, path=None, visited=None) -> Optional[tuple[list, int]]:
 
         if visited is None:
@@ -104,40 +84,51 @@ class Graph:
         path.pop()
         return None
 
-    def bfs(self, start, end, comp_function) -> tuple[list, int] | None:
-        visited = set()
-        fila = Queue()
+    def bfs_search(self, start_node, end_node_list) -> Optional[tuple[list, int]]:
 
-        fila.put(start)
-        visited.add(start)
+        visited = set()
+        queue = Queue()
+
+        queue.put(start_node)
+        visited.add(start_node)
 
         parent = dict()
-        parent[start] = None
+        parent[start_node] = None
 
         path_found = False
-        while not fila.empty() and path_found is False:
-            nodo_atual = fila.get()
-            if comp_function(nodo_atual, end):
+        end_node_found = None
+        while not queue.empty() and not path_found:
+
+            current_node = queue.get()
+
+            if current_node in end_node_list:
+                end_node_found = current_node
                 path_found = True
+
             else:
-                for (adjacente, peso) in self.graph[nodo_atual].items():
-                    if adjacente not in visited:
-                        fila.put(adjacente)
-                        parent[adjacente] = nodo_atual
-                        visited.add(adjacente)
+                for (adjacent_node, weight) in self.graph[current_node].items():
+
+                    if adjacent_node not in visited:
+
+                        queue.put(adjacent_node)
+                        parent[adjacent_node] = current_node
+                        visited.add(adjacent_node)
 
         path = []
+        cost = 0
         if path_found:
-            path.append(end)
-            while parent[end] is not None:
-                path.append(parent[end])
-                end = parent[end]
-            path.reverse()
-            # funçao calcula custo caminho
-            custo = self.path_cost(path)
-            return path, custo
 
-        return None
+            path.append(end_node_found)
+
+            while parent[end_node_found]:
+
+                path.append(parent[end_node_found])
+                end_node_found = parent[end_node_found]
+
+            path.reverse()
+            cost = self.path_cost(path)
+
+        return path, cost
 
     def get_neighbours(self, nodo) -> list:
         lista = []
