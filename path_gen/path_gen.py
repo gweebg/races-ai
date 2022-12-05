@@ -1,15 +1,18 @@
 import copy
 from collections import deque
 
+from rich.console import Console
+
 from graph.graph import Graph
 from parser.parser import MapPiece
 
 from models.race_car import RaceCar, Coordinates
 
+console = Console()
+
 
 class CircuitNode:
     def __init__(self, car: RaceCar, piece: MapPiece):
-
         self.car = car
         self.piece = piece
 
@@ -21,7 +24,6 @@ class CircuitNode:
 
 
 def is_out_of_bounds(car: RaceCar, circuit_x: int, circuit_y: int) -> bool:
-
     if (0 <= car.pos.x < circuit_x) and (0 <= car.pos.y < circuit_y):
         return False
 
@@ -29,7 +31,6 @@ def is_out_of_bounds(car: RaceCar, circuit_x: int, circuit_y: int) -> bool:
 
 
 def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int) -> Graph:
-
     graph = Graph(True)
 
     car = RaceCar(
@@ -57,7 +58,6 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
         for (start_node, last_node, node_crashed, crash_node) in next_node_paths:
 
             if last_node.piece == MapPiece.FINISH:
-
                 last_node.car.set_acc_zero()
                 last_node.car.set_vel_zero()
 
@@ -82,7 +82,6 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
 
 def get_node_path(circuit: list[list[MapPiece]], node: CircuitNode):
-
     n_x: int = node.car.pos.x
     n_y: int = node.car.pos.y
 
@@ -106,7 +105,6 @@ def get_node_path(circuit: list[list[MapPiece]], node: CircuitNode):
             return last_node, True, None
 
         if circuit[n_y][n_x] is MapPiece.OUTSIDE_TRACK:
-
             n_node = copy.deepcopy(last_node)
             n_node.piece = circuit[n_y][n_x]
 
@@ -119,7 +117,6 @@ def get_node_path(circuit: list[list[MapPiece]], node: CircuitNode):
             return last_node, True, n_node
 
         if circuit[n_y][n_x] is MapPiece.FINISH:
-
             last_node.piece = circuit[n_y][n_x]
 
             last_node.car.pos.x = n_x
@@ -135,7 +132,6 @@ def get_node_path(circuit: list[list[MapPiece]], node: CircuitNode):
 
 
 def expand_track_moves(circuit: list[list[MapPiece]], circuit_node: CircuitNode):
-
     list_paths = []
 
     if circuit_node.piece is MapPiece.FINISH:

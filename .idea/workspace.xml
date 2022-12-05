@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8f5ce33f-0895-4c84-bfcf-2b33b70c7ec4" name="Changes" comment="Needs debugging!">
+    <list default="true" id="8f5ce33f-0895-4c84-bfcf-2b33b70c7ec4" name="Changes" comment="It is working once again :)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/graph.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph/graph.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mapper/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapper/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapper/tiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/mapper/tiles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/race_car.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/race_car.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/path_gen/path_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/path_gen/path_gen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,7 +162,7 @@
       <workItem from="1670252947533" duration="25000" />
       <workItem from="1670252985663" duration="2546000" />
       <workItem from="1670257359139" duration="260000" />
-      <workItem from="1670270435685" duration="1757000" />
+      <workItem from="1670270435685" duration="5125000" />
     </task>
     <task id="LOCAL-00001" summary="Pronto para entrega 1.">
       <created>1669853788327</created>
@@ -185,7 +185,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670255526126</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="It is working once again :)">
+      <created>1670272225829</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1670272225829</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -206,7 +213,8 @@
     <MESSAGE value="Pronto para entrega 1." />
     <MESSAGE value="Pronto para entrega 1.1" />
     <MESSAGE value="Needs debugging!" />
-    <option name="LAST_COMMIT_MESSAGE" value="Needs debugging!" />
+    <MESSAGE value="It is working once again :)" />
+    <option name="LAST_COMMIT_MESSAGE" value="It is working once again :)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/races_ai$parser.coverage" NAME="parser Coverage Results" MODIFIED="1669636059840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/parser" />
@@ -214,6 +222,6 @@
     <SUITE FILE_PATH="coverage/races_ai$generator.coverage" NAME="generator Coverage Results" MODIFIED="1670181426669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mapper" />
     <SUITE FILE_PATH="coverage/races_ai$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1669854366192" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mapper" />
     <SUITE FILE_PATH="coverage/races_ai$map_window.coverage" NAME="map_window Coverage Results" MODIFIED="1669808894986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/parser" />
-    <SUITE FILE_PATH="coverage/races_ai$run.coverage" NAME="run Coverage Results" MODIFIED="1670272168956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mapper" />
+    <SUITE FILE_PATH="coverage/races_ai$run.coverage" NAME="run Coverage Results" MODIFIED="1670273179576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mapper" />
   </component>
 </project>

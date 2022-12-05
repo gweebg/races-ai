@@ -3,6 +3,7 @@ import os
 import pygame
 
 from rich.console import Console
+from rich.progress import Progress
 from rich.prompt import Prompt, IntPrompt
 
 from mapper.tiles import TileMap
@@ -158,30 +159,54 @@ def path_coordinates(path):
 
 # Run the simulation.
 def main():
-    my_map, map_path = main_menu()  # Load the Map via console prompt.
-    algorithm: str = prompt_algorithm()  # Get which algorithm to use on the path.
+
+    # Choosing the map and algorithm. #
+
+    my_map, map_path = main_menu()
+    algorithm = prompt_algorithm()
+
+    # Execute the main logic. #
 
     circuit, start_pos, finish_pos_list = parse_map(map_path)
-    graph = generate_paths_graph(circuit, start_pos[0], start_pos[1])
+    console.print("\n")
 
-    st = CircuitNode(
-        RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
-        circuit[start_pos[1]][start_pos[0]]
-    )
+    with Progress(console=console) as progress:
 
-    f_pos = finish_pos_list[2]
+        task = progress.add_task("[magenta bold]Computing the path...", start=False, total=100)
 
-    end = CircuitNode(
-        RaceCar(pos=Coordinates(x=f_pos[0], y=f_pos[1])),
-        circuit[f_pos[1]][f_pos[0]]
-    )
+        while not progress.finished:
 
-    if algorithm == 'DFS':
-        path, cost = graph.dfs(st, end)
+            graph = generate_paths_graph(circuit, start_pos[0], start_pos[1])
+            progress.update(task, advance=20)
 
-    path = path_coordinates(path)
+            starting_node = CircuitNode(
+                RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
+                circuit[start_pos[1]][start_pos[0]]
+            )
+            progress.update(task, advance=20)
 
-    console.print("[bold green]\nFinished setting up the simulation![/]")
+            finish_nodes: list[CircuitNode] = list(map(
+                lambda pos:
+                CircuitNode(RaceCar(pos=Coordinates(x=pos[0], y=pos[1])), circuit[pos[1]][pos[0]]),
+                finish_pos_list
+            ))
+            progress.update(task, advance=20)
+
+            path = None
+
+            if algorithm == 'DFS':
+                path, cost = graph.dfs_search(starting_node, finish_nodes)
+
+            progress.update(task, advance=20)
+
+            path = path_coordinates(path)
+            progress.update(task, advance=20)
+
+            progress.update(task, description="[blue]Done, cleaning up...", advance=100)
+            progress.stop_task(task)
+
+    # Diplay options from computed path. #
+    console.print("\n", end='')
     running = True
 
     while running:
@@ -205,3 +230,10 @@ def main():
 
 if __name__ == "__main__":
     SystemExit(main())
+
+
+"""
+Interface To-Do List:
+- Add block variations.
+- Add loading bar.
+"""

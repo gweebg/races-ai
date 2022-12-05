@@ -1,12 +1,8 @@
-import math
-from queue import Queue
-from typing import Dict, List, Tuple, Any
-from collections import deque
-
-# Biblioteca de tratamento de grafos necessária para desenhar graficamente o grafo
-import networkx as nx
-# Biblioteca de tratamento de grafos necessária para desenhar graficamente o grafo
 import matplotlib.pyplot as plt
+import networkx as nx
+
+from typing import Optional
+from queue import Queue
 
 
 class Graph:
@@ -79,6 +75,32 @@ class Graph:
                 resultado = self.dfs(adjacente, end, path, visited)
                 if resultado is not None:
                     return resultado
+        path.pop()
+        return None
+
+    def dfs_search(self, start_node, end_node_list, path=None, visited=None) -> Optional[tuple[list, int]]:
+
+        if visited is None:
+            visited = set()
+
+        if path is None:
+            path = list()
+
+        path.append(start_node)
+        visited.add(start_node)
+
+        if start_node in end_node_list:
+            cost = self.path_cost(path)
+            return path, cost
+
+        for (adjacent_node, weight) in self.graph[start_node].items():
+
+            if adjacent_node not in visited:
+                result = self.dfs_search(adjacent_node, end_node_list, path, visited)
+
+                if result:
+                    return result
+
         path.pop()
         return None
 
