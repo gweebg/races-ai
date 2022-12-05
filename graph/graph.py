@@ -62,7 +62,7 @@ class Graph:
     def add_heuristic(self, val, heur):
         self.heur[val] = heur
 
-    def dfs(self, start, end, comp_function, path=None, visited=None) -> tuple[list, int] | None:
+    def dfs(self, start, end, path=None, visited=None) -> tuple[list, int] | None:
         if visited is None:
             visited = set()
         if path is None:
@@ -71,12 +71,12 @@ class Graph:
         path.append(start)
         visited.add(start)
 
-        if comp_function(start, end):
+        if start == end:
             custo = self.path_cost(path)
             return path, custo
         for (adjacente, pesos) in self.graph[start].items():
             if adjacente not in visited:
-                resultado = self.dfs(adjacente, end, comp_function, path, visited)
+                resultado = self.dfs(adjacente, end, path, visited)
                 if resultado is not None:
                     return resultado
         path.pop()

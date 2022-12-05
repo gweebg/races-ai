@@ -115,6 +115,12 @@ def generate_player_graph(circuit, init_pos_x, init_pos_y):
         next_node_paths = expand_track_moves(circuit, node)
 
         for (s_node, last_node, is_crashed, crash_node) in next_node_paths:
+            if last_node.piece == MapPiece.FINISH:
+                last_node.car.accel_x = 0
+                last_node.car.accel_y = 0
+                last_node.car.vel_x = 0
+                last_node.car.vel_y = 0
+
             cost = 25 if is_crashed else 1
             g.add_edge(node, s_node, cost)
             if crash_node is not None:
@@ -178,93 +184,70 @@ def expand_track_moves(circuit, c_node: CircuitNode):
     if c_node.piece is MapPiece.FINISH:
         return []
     list_paths = []
+    closed_set = set()
 
     node = copy.deepcopy(c_node)
     node.car.accel_up()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_down()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_left()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_right()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_topright()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_topleft()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_downright()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     node = copy.deepcopy(c_node)
     node.car.accel_downleft()
     node.car.update_vel()
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
-    list_paths.append((node, last_node, is_crashed, crash_node))
+    if last_node not in closed_set:
+        closed_set.add(last_node)
+        list_paths.append((node, last_node, is_crashed, crash_node))
 
     return list_paths
-
-def get_node_path_old(circuit, node):
-    nlist = [node]
-    nx = node.car.pos_x
-    ny = node.car.pos_y
-    endx = nx + node.car.vel_x
-    endy = ny + node.car.vel_y
-    xdir = max(-1, min(endx - nx, 1))
-    ydir = max(-1, min(endy - ny, 1))
-
-    while nx != endx or ny != endy:
-        if nx != endx:
-            nx += xdir
-        if ny != endy:
-            ny += ydir
-
-        if nx >= len(circuit[0]) or nx < 0 or ny >= len(circuit) or ny < 0:
-            return nlist, True
-
-        if circuit[ny][nx] is MapPiece.OUTSIDE_TRACK:
-            n_node = copy.deepcopy(node)
-            n_node.piece = circuit[ny][nx]
-            n_node.pos_x = nx
-            n_node.pos_y = ny
-            nlist.append(n_node)
-            last_node = copy.deepcopy(nlist[-1])
-            last_node.car.vel_x = 0
-            last_node.car.vel_y = 0
-            last_node.car.accel_x = 0
-            last_node.car.accel_y = 0
-            nlist.append(last_node)
-            return nlist, True
-
-        n_node = copy.deepcopy(node)
-        n_node.piece = circuit[ny][nx]
-        n_node.pos_x = nx
-        n_node.pos_y = ny
-        nlist.append(n_node)
-
-    return nlist, False

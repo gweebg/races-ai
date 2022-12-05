@@ -124,11 +124,6 @@ def run_graphical(my_map: TileMap, path: list[tuple[int,int]]):
         window.blit(canvas, (0, 0))
         pygame.display.update()
 
-
-def compare_circuit_nodes(val1, val2):
-    return val1.car.pos_x == val2.car.pos_x and val1.car.pos_y == val2.car.pos_y
-
-
 def path_coordinates(path):
     coord_list = []
 
@@ -166,7 +161,7 @@ def main():
     end = CircuitNode(Car(pos_x=f_pos[0], pos_y=f_pos[1]), circuit[f_pos[1]][f_pos[0]])
 
     if algorithm == 'DFS':
-        path, cost = graph.dfs(st, end, compare_circuit_nodes)
+        path, cost = graph.dfs(st, end)
 
     path = path_coordinates(path)
 
