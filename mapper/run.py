@@ -6,8 +6,9 @@ from rich.console import Console
 from rich.prompt import Prompt, IntPrompt
 
 from mapper.tiles import TileMap
+from models.race_car import RaceCar, Coordinates
 from parser.parser import parse_map
-from path_gen.path_gen import generate_player_graph, CircuitNode, Car
+from path_gen.path_gen import generate_paths_graph, CircuitNode
 
 # Console pretty printer. #
 
@@ -65,7 +66,7 @@ def prompt_simulate() -> int:
     return option
 
 
-def run_graphical(my_map: TileMap, path: list[tuple[int,int]]):
+def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
     # Setting game variables. #
 
     pygame.init()
@@ -124,18 +125,23 @@ def run_graphical(my_map: TileMap, path: list[tuple[int,int]]):
         window.blit(canvas, (0, 0))
         pygame.display.update()
 
+
 def path_coordinates(path):
     coord_list = []
 
     for i in range(1, len(path)):
-        node1 = path[i-1]
+
+        node1 = path[i - 1]
         node2 = path[i]
-        nx = node1.car.pos_x
-        ny = node1.car.pos_y
-        endx = node2.car.pos_x
-        endy = node2.car.pos_y
-        xdir = max(-1, min(node2.car.pos_x - node1.car.pos_x, 1))
-        ydir = max(-1, min(node2.car.pos_y - node1.car.pos_y, 1))
+
+        nx = node1.car.pos.x
+        ny = node1.car.pos.y
+
+        endx = node2.car.pos.x
+        endy = node2.car.pos.y
+
+        xdir = max(-1, min(node2.car.pos.x - node1.car.pos.x, 1))
+        ydir = max(-1, min(node2.car.pos.y - node1.car.pos.y, 1))
 
         coord_list.append((nx + 1, ny + 1))
         while nx != endx or ny != endy:
@@ -148,17 +154,26 @@ def path_coordinates(path):
 
     return coord_list
 
+
 # Run the simulation.
 def main():
     my_map, map_path = main_menu()  # Load the Map via console prompt.
     algorithm: str = prompt_algorithm()  # Get which algorithm to use on the path.
 
     circuit, start_pos, finish_pos_list = parse_map(map_path)
-    graph = generate_player_graph(circuit, start_pos[0], start_pos[1])
+    graph = generate_paths_graph(circuit, start_pos[0], start_pos[1])
 
-    st = CircuitNode(Car(pos_x=start_pos[0], pos_y=start_pos[1]), circuit[start_pos[1]][start_pos[0]])
+    st = CircuitNode(
+        RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
+        circuit[start_pos[1]][start_pos[0]]
+    )
+
     f_pos = finish_pos_list[2]
-    end = CircuitNode(Car(pos_x=f_pos[0], pos_y=f_pos[1]), circuit[f_pos[1]][f_pos[0]])
+
+    end = CircuitNode(
+        RaceCar(pos=Coordinates(x=f_pos[0], y=f_pos[1])),
+        circuit[f_pos[1]][f_pos[0]]
+    )
 
     if algorithm == 'DFS':
         path, cost = graph.dfs(st, end)
@@ -167,7 +182,6 @@ def main():
 
     console.print("[bold green]\nFinished setting up the simulation![/]")
     running = True
-
 
     while running:
         next_action = prompt_simulate()
