@@ -74,6 +74,7 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
     pygame.init()
 
     DISPLAY_W, DISPLAY_H = my_map.map_w, my_map.map_h
+    print(DISPLAY_W, " ", DISPLAY_H)
 
     canvas = pygame.Surface((DISPLAY_W, DISPLAY_H), pygame.SRCALPHA)
     window = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
@@ -82,7 +83,6 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
 
     # Starting game loop. #
 
-    # path = [(9, 2), (8, 3), (7, 3), (6, 4), (6, 5), (6, 6), (7, 7), (8, 8), (9, 9), (9, 10)]
     path_counter = 0
     path_length = len(path)
 
@@ -104,7 +104,8 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
 
                         pygame.draw.circle(canvas,
                                            (245, 66, 236, 100),
-                                           (path[path_counter][0] * 64 - 32, path[path_counter][1] * 64 - 32),
+                                           (path[path_counter][0] * 64 - 32,
+                                            path[path_counter][1] * 64 - 32),
                                            5)
 
                         if path_counter > 0:
@@ -128,38 +129,31 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
         pygame.display.update()
 
 
-def path_coordinates(path):
-    coord_list = []
+def clean_path(path: list[CircuitNode]) -> list[CircuitNode]:
+    c_path = [path[0]]
 
     for i in range(1, len(path)):
 
         node1 = path[i - 1]
         node2 = path[i]
 
-        nx = node1.car.pos.x
-        ny = node1.car.pos.y
+        if node1.car.pos != node2.car.pos:
+            c_path.append(node2)
 
-        endx = node2.car.pos.x
-        endy = node2.car.pos.y
+    return c_path
 
-        xdir = max(-1, min(node2.car.pos.x - node1.car.pos.x, 1))
-        ydir = max(-1, min(node2.car.pos.y - node1.car.pos.y, 1))
 
-        coord_list.append((nx + 1, ny + 1))
-        while nx != endx or ny != endy:
-            if nx != endx:
-                nx += xdir
-            if ny != endy:
-                ny += ydir
+def path_to_tuple(path: list[CircuitNode]) -> list[tuple[int, int]]:
+    ls = []
 
-            coord_list.append((nx + 1, ny + 1))
+    for node in path:
+        ls.append((node.car.pos.x+1, node.car.pos.y+1))
 
-    return coord_list
+    return ls
 
 
 # Run the simulation.
 def main():
-
     # Choosing the map and algorithm. #
 
     my_map, map_path = main_menu()
@@ -202,7 +196,9 @@ def main():
 
             progress.update(task, advance=20)
 
-            path = path_coordinates(path)
+            # path = path_coordinates(path)
+            path = clean_path(path)
+            path = path_to_tuple(path)
             progress.update(task, advance=20)
 
             progress.update(task, description="[blue]Done, cleaning up...", advance=100)
@@ -235,7 +231,6 @@ def main():
 
 if __name__ == "__main__":
     SystemExit(main())
-
 
 """
 Interface To-Do List:
