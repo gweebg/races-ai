@@ -68,28 +68,28 @@ class TileMap:
 
                 elif tile == 'X':
                     tiles.append(Tile(
-                        '../docs/assets/grass-ico.jpg',
+                        '../../docs/assets/grass-ico.jpg',
                         x * self.tile_size,
                         y * self.tile_size
                     ))
 
                 elif tile == '-':
                     tiles.append(Tile(
-                        '../docs/assets/cobblestone-ico.png',
+                        '../../docs/assets/cobblestone-ico.png',
                         x * self.tile_size,
                         y * self.tile_size
                     ))
 
                 elif tile == 'P':
                     tiles.append(Tile(
-                        '../docs/assets/redstone-block-ico.png',
+                        '../../docs/assets/redstone-block-ico.png',
                         x * self.tile_size,
                         y * self.tile_size
                     ))
 
                 elif tile == 'F':
                     tiles.append(Tile(
-                        '../docs/assets/gold-block-ico.png',
+                        '../../docs/assets/gold-block-ico.png',
                         x * self.tile_size,
                         y * self.tile_size
                     ))

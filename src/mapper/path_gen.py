@@ -4,10 +4,10 @@ from collections import deque
 
 from rich.console import Console
 
-from graph.graph import Graph
-from parser.parser import MapPiece
+from src.graph.graph import Graph
+from src.parser.parser import MapPiece
 
-from models.race_car import RaceCar, Coordinates
+from src.models.race_car import RaceCar, Coordinates
 
 console = Console()
 

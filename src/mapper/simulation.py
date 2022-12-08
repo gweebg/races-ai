@@ -1,6 +1,6 @@
 import pygame
 
-from mapper.tiles import TileMap
+from src.mapper.tiles import TileMap
 
 
 class Simulation:
@@ -63,7 +63,7 @@ class Simulation:
 
                     if event.key == pygame.K_r:
                         self.my_map.draw_map(self.canvas)
-                        path_counter = 0
+                        self.path_counter = 0
 
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                         pygame.quit()

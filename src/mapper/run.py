@@ -5,13 +5,13 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.prompt import Prompt, IntPrompt
 
-from graph.graph import Graph
-from mapper.tiles import TileMap
-from models.race_car import RaceCar, Coordinates
-from parser.parser import parse_map
-from mapper.path_gen import generate_paths_graph, CircuitNode
+from src.graph.graph import Graph
+from src.mapper.tiles import TileMap
+from src.models.race_car import RaceCar, Coordinates
+from src.parser.parser import parse_map
+from src.mapper.path_gen import generate_paths_graph, CircuitNode
 
-from mapper.simulation import Simulation
+from src.mapper.simulation import Simulation
 
 
 class Application:
@@ -108,7 +108,7 @@ class Application:
         self.console.print("  [bold cyan]2.[/] Change the algorithm?")
         self.console.print("  [bold cyan]3.[/] Exit...")
 
-        option = IntPrompt.ask("What's it gonna be", choices=[str(num) for num in range(5)])
+        option = IntPrompt.ask("What's it gonna be", choices=[str(num) for num in range(4)])
 
         return option
 
@@ -184,13 +184,9 @@ class Application:
 
 def main():
 
-    app = Application('../docs/maps')
+    app = Application('../../docs/maps')
     app.run()
 
 
 if __name__ == '__main__':
     SystemExit(main())
-
-
-
-
