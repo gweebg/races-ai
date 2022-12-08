@@ -4,7 +4,7 @@ import os
 
 class Tile(pygame.sprite.Sprite):
 
-    def __init__(self, image, x, y, spritesheet):
+    def __init__(self, image, x, y):
 
         pygame.sprite.Sprite.__init__(self)
 
@@ -19,7 +19,7 @@ class Tile(pygame.sprite.Sprite):
 
 class TileMap:
 
-    def __init__(self, filename, spritesheet):
+    def __init__(self, filename):
 
         self.map_h = None
         self.map_w = None
@@ -27,7 +27,6 @@ class TileMap:
         self.tile_size = 64
         self.start_x, self.start_y = 0, 0
 
-        self.spritesheet = spritesheet
         self.tiles = self.load_tiles(filename)
 
         self.map_surface = pygame.Surface((self.map_w, self.map_h))
@@ -69,31 +68,31 @@ class TileMap:
 
                 elif tile == 'X':
                     tiles.append(Tile(
-                        '../docs/grass-ico.jpg',
+                        '../docs/assets/grass-ico.jpg',
                         x * self.tile_size,
-                        y * self.tile_size,
-                        self.spritesheet))
+                        y * self.tile_size
+                    ))
 
                 elif tile == '-':
                     tiles.append(Tile(
-                        '../docs/cobblestone-ico.png',
+                        '../docs/assets/cobblestone-ico.png',
                         x * self.tile_size,
-                        y * self.tile_size,
-                        self.spritesheet))
+                        y * self.tile_size
+                    ))
 
                 elif tile == 'P':
                     tiles.append(Tile(
-                        '../docs/redstone-block-ico.png',
+                        '../docs/assets/redstone-block-ico.png',
                         x * self.tile_size,
-                        y * self.tile_size,
-                        self.spritesheet))
+                        y * self.tile_size
+                    ))
 
                 elif tile == 'F':
                     tiles.append(Tile(
-                        '../docs/gold-block-ico.png',
+                        '../docs/assets/gold-block-ico.png',
                         x * self.tile_size,
-                        y * self.tile_size,
-                        self.spritesheet))
+                        y * self.tile_size
+                    ))
 
                 x += 1
             y += 1
