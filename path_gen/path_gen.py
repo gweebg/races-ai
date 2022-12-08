@@ -42,7 +42,15 @@ def calc_distance_heur(pos1: tuple[int, int], pos_list: list[tuple[int, int]]) -
     return lesser
 
 
-def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int, finish_pos_list: list[tuple[int, int]]) -> Graph:
+def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> float:
+    if node.piece is MapPiece.FINISH:
+        return 0
+
+    return calc_distance_heur((node.car.pos.x, node.car.pos.y), finish_pos_list)
+
+
+def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int,
+                         finish_pos_list: list[tuple[int, int]]) -> Graph:
     graph = Graph(True)
 
     car = RaceCar(
@@ -67,7 +75,7 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
         next_node_paths = expand_track_moves(circuit, node)
 
-        graph.add_heuristic(node, calc_distance_heur((node.car.pos.x, node.car.pos.y), finish_pos_list))
+        graph.add_heuristic(node, 0)
 
         for (start_node, last_node, node_crashed, crash_node) in next_node_paths:
 
@@ -79,21 +87,17 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
             # Adding coorresponding edge to the play.
             graph.add_edge(node, start_node, cost)
-            if not graph.has_heuristic(start_node):
-                graph.add_heuristic(start_node, calc_distance_heur((start_node.car.pos.x, start_node.car.pos.y), finish_pos_list))
-
-            if not graph.has_heuristic(last_node):
-                graph.add_heuristic(last_node, calc_distance_heur((last_node.car.pos.x, last_node.car.pos.y), finish_pos_list))
 
             if crash_node is not None:
                 graph.add_edge(start_node, crash_node, 0)
                 graph.add_edge(crash_node, last_node, 0)
 
-                if not graph.has_heuristic(crash_node):
-                    graph.add_heuristic(crash_node, calc_distance_heur((crash_node.car.pos.x, crash_node.car.pos.y), finish_pos_list))
+                graph.add_heuristic(crash_node, 0)
+                graph.add_heuristic(start_node, 1_000_000)
 
             else:
                 graph.add_edge(start_node, last_node, 0)
+                graph.add_heuristic(start_node, calc_heur(last_node, finish_pos_list))
 
             if last_node not in closed_set:
                 open_queue.append(last_node)
