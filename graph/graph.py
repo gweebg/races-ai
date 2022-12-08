@@ -64,6 +64,9 @@ class Graph:
     def add_heuristic(self, val, heur):
         self.heur[val] = heur
 
+    def has_heuristic(self, val):
+        return val in self.heur
+
     # Search Functions #
 
     def dfs_search(self, start_node, end_node_list, path=None, visited=None) -> Optional[tuple[list, int]]:
@@ -138,7 +141,7 @@ class Graph:
 
         return path, cost
 
-    def greedy(self, start, end) -> tuple[list, int] | None:
+    def greedy(self, start, end_list) -> tuple[list, int] | None:
         open_list = {start}
         closed_list = set([])
 
@@ -155,7 +158,7 @@ class Graph:
                 print('Path does not exist!')
                 return None
 
-            if n == end:
+            if n in end_list:
                 reconst_path = []
 
                 while parents[n] != n:
@@ -179,7 +182,7 @@ class Graph:
         print('Path does not exist!')
         return None
 
-    def a_star(self, start, end) -> tuple[list, int] | None:
+    def a_star(self, start, end_list) -> tuple[list, int] | None:
         open_list = {start}
         closed_list = set([])
 
@@ -198,7 +201,7 @@ class Graph:
                 print('Path does not exist!')
                 return None
 
-            if n == end:
+            if n in end_list:
                 reconst_path = []
 
                 while parents[n] != n:
@@ -215,7 +218,7 @@ class Graph:
                 if m not in open_list and m not in closed_list:
                     open_list.add(m)
                     parents[m] = n
-                    g[m] = g[n] + weight[0]
+                    g[m] = g[n] + weight
 
             open_list.remove(n)
             closed_list.add(n)

@@ -6,6 +6,7 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.prompt import Prompt, IntPrompt
 
+from graph.graph import Graph
 from mapper.tiles import TileMap
 from models.race_car import RaceCar, Coordinates
 from parser.parser import parse_map
@@ -20,7 +21,7 @@ console = Console()
 maps = '../docs/maps'
 # maps = '/home/guilherme/PycharmProjects/races-ai/docs/maps'
 # available_algorithms = ["DFS", "BFS", "A*", "Greedy"]
-available_algorithms = ["DFS", "BFS"]
+available_algorithms = ["DFS", "BFS", "Greedy", "AStar"]
 
 
 # Returns a list containing every map file in the provided path.
@@ -62,9 +63,10 @@ def prompt_simulate() -> int:
     console.print("  [bold cyan]0.[/] Run graphic interface.")
     console.print("  [bold cyan]1.[/] Print found path.")
     console.print("  [bold cyan]2.[/] Print generated graph.")
-    console.print("  [bold cyan]3.[/] Exit.")
+    console.print("  [bold cyan]3.[/] Choose another map.")
+    console.print("  [bold cyan]4.[/] Exit.")
 
-    option = IntPrompt.ask("What's it gonna be", choices=[str(num) for num in range(4)])
+    option = IntPrompt.ask("What's it gonna be", choices=[str(num) for num in range(5)])
     return option
 
 
@@ -74,7 +76,6 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
     pygame.init()
 
     DISPLAY_W, DISPLAY_H = my_map.map_w, my_map.map_h
-    print(DISPLAY_W, " ", DISPLAY_H)
 
     canvas = pygame.Surface((DISPLAY_W, DISPLAY_H), pygame.SRCALPHA)
     window = pygame.display.set_mode((DISPLAY_W, DISPLAY_H))
@@ -96,7 +97,7 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                running = False
+                return
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
@@ -125,6 +126,10 @@ def run_graphical(my_map: TileMap, path: list[tuple[int, int]]):
                     my_map.draw_map(canvas)
                     path_counter = 0
 
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    return
+
         window.blit(canvas, (0, 0))
         pygame.display.update()
 
@@ -147,74 +152,72 @@ def path_to_tuple(path: list[CircuitNode]) -> list[tuple[int, int]]:
     ls = []
 
     for node in path:
-        ls.append((node.car.pos.x+1, node.car.pos.y+1))
+        ls.append((node.car.pos.x + 1, node.car.pos.y + 1))
 
     return ls
 
 
-# Run the simulation.
-def main():
-    # Choosing the map and algorithm. #
-
-    my_map, map_path = main_menu()
-    algorithm = prompt_algorithm()
-
-    # Execute the main logic. #
+def prompt_graph(map_path) -> tuple[Graph, CircuitNode, list[CircuitNode]]:
+    # Choosing the map. #
 
     circuit, start_pos, finish_pos_list = parse_map(map_path)
     console.print("\n")
 
     with Progress(console=console) as progress:
+        task = progress.add_task("[magenta bold]Generating Graph...", start=False, total=100)
 
-        task = progress.add_task("[magenta bold]Computing the path...", start=False, total=100)
+        graph = generate_paths_graph(circuit, start_pos[0], start_pos[1], finish_pos_list)
+        progress.update(task, advance=50)
 
-        while not progress.finished:
+        starting_node = CircuitNode(
+            RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
+            circuit[start_pos[1]][start_pos[0]]
+        )
+        progress.update(task, advance=20)
 
-            graph = generate_paths_graph(circuit, start_pos[0], start_pos[1])
-            progress.update(task, advance=20)
+        finish_nodes: list[CircuitNode] = list(map(
+            lambda pos:
+            CircuitNode(RaceCar(pos=Coordinates(x=pos[0], y=pos[1])), circuit[pos[1]][pos[0]]),
+            finish_pos_list
+        ))
 
-            starting_node = CircuitNode(
-                RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
-                circuit[start_pos[1]][start_pos[0]]
-            )
-            progress.update(task, advance=20)
+        progress.update(task, description="[blue]Done, cleaning up...", advance=30)
+        progress.stop_task(task)
 
-            finish_nodes: list[CircuitNode] = list(map(
-                lambda pos:
-                CircuitNode(RaceCar(pos=Coordinates(x=pos[0], y=pos[1])), circuit[pos[1]][pos[0]]),
-                finish_pos_list
-            ))
-            progress.update(task, advance=20)
+    return graph, starting_node, finish_nodes
 
-            path = None
 
-            if algorithm == 'DFS':
-                path, cost = graph.dfs_search(starting_node, finish_nodes)
+# Run the simulation.
+def main():
 
-            if algorithm == 'BFS':
-                path, cost = graph.bfs_search(starting_node, finish_nodes)
-
-            progress.update(task, advance=20)
-
-            # path = path_coordinates(path)
-            path = clean_path(path)
-            path = path_to_tuple(path)
-            progress.update(task, advance=20)
-
-            progress.update(task, description="[blue]Done, cleaning up...", advance=100)
-            progress.stop_task(task)
-
-    # Diplay options from computed path. #
+    my_map, map_path = main_menu()
+    graph, starting_node, finish_nodes = prompt_graph(map_path)
 
     console.print("\n", end='')
     running = True
 
     while running:
+        algorithm = prompt_algorithm()
+
+        path = None
+
+        match algorithm:
+            case "DFS":
+                path, cost = graph.dfs_search(starting_node, finish_nodes)
+            case "BFS":
+                path, cost = graph.bfs_search(starting_node, finish_nodes)
+            case "Greedy":
+                path, cost = graph.greedy(starting_node, finish_nodes)
+            case "AStar":
+                path, cost = graph.a_star(starting_node, finish_nodes)
+
+        path = clean_path(path)
+        path = path_to_tuple(path)
+
         next_action = prompt_simulate()
 
         if next_action == 0:
             run_graphical(my_map, path)
-            running = False
 
         if next_action == 1:
             console.print("Found this path:")
@@ -226,6 +229,10 @@ def main():
             graph.draw()
 
         if next_action == 3:
+            my_map, map_path = main_menu()
+            graph, starting_node, finish_nodes = prompt_graph(map_path)
+
+        if next_action == 4:
             running = False
 
 
