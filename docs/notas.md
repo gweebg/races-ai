@@ -66,3 +66,4 @@ estado/teste objetivo, os operadores (nome, pré-condições, efeitos) e custo d
 ### Descrição de tarefas e Decisões tomadas
 
 ### Sumário e discussão dos resultados obtidos
+
