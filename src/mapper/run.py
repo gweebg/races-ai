@@ -114,22 +114,12 @@ class Application:
 
     def print_path(self):
         self.console.print("Found this path:")
-        self.console.print(self.path)
+        strg = ""
+        for i in range(0, len(self.path)):
+            node = self.path[i]
+            strg += f"Node {i}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
+        self.console.print(strg)
         self.console.print(f"[bold]With the [green]cost[/] of: [yellow]{self.cost}[/][/]")
-
-    @staticmethod
-    def clean_path(path: list[CircuitNode]) -> list[CircuitNode]:
-        c_path = [path[0]]
-
-        for i in range(1, len(path)):
-
-            node1 = path[i - 1]
-            node2 = path[i]
-
-            if node1.car.pos != node2.car.pos:
-                c_path.append(node2)
-
-        return c_path
 
     @staticmethod
     def path_to_tuple(path: list[CircuitNode]) -> list[tuple[int, int]]:
@@ -146,9 +136,7 @@ class Application:
 
         self.path, self.cost = algorithm_func(self.graph[1], self.graph[2])
 
-        if self.path:
-            self.path = self.clean_path(self.path)
-            self.path = self.path_to_tuple(self.path)
+        tuple_path = self.path_to_tuple(self.path)
 
         reset, restart = False, False
 
@@ -160,14 +148,12 @@ class Application:
 
                 self.path, self.cost = algorithm_func(self.graph[1], self.graph[2])
 
-                if self.path:
-                    self.path = self.clean_path(self.path)
-                    self.path = self.path_to_tuple(self.path)
+                tuple_path = self.path_to_tuple(self.path)
 
             next_action: int = self.prompt_action()
 
             if next_action == 0:
-                Simulation(self.tile_map, self.path).simulate()
+                Simulation(self.tile_map, tuple_path).simulate()
                 reset = False
 
             if next_action == 1:
