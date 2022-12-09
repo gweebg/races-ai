@@ -85,7 +85,7 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
             cost: int = 25 if node_crashed else 1
 
-            # Adding coorresponding edge to the play.
+            # Adding corresponding edge to the play.
             graph.add_edge(node, start_node, cost)
 
             if crash_node is not None:

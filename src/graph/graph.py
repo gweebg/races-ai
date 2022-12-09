@@ -141,7 +141,7 @@ class Graph:
 
         return path, cost
 
-    def greedy(self, start, end_list) -> tuple[list, int] | None:
+    def greedy_search(self, start, end_list) -> tuple[list, int] | None:
         open_list = {start}
         closed_list = set([])
 
@@ -182,7 +182,7 @@ class Graph:
         print('Path does not exist!')
         return None
 
-    def a_star(self, start, end_list) -> tuple[list, int] | None:
+    def a_star_search(self, start, end_list) -> tuple[list, int] | None:
         open_list = {start}
         closed_list = set([])
 

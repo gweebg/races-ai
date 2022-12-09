@@ -33,8 +33,8 @@ class Application:
         self.algorithm_map: dict[str, Callable[[CircuitNode, list[CircuitNode]], Optional[tuple[list, int]]]] = {
             "DFS": self.graph[0].dfs_search,
             "BFS": self.graph[0].bfs_search,
-            "Greedy": self.graph[0].greedy,
-            "AStar": self.graph[0].a_star
+            "Greedy": self.graph[0].greedy_search,
+            "AStar": self.graph[0].a_star_search
         }
 
     def get_maps(self, maps_path: str) -> list[str]:
