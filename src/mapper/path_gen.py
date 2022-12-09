@@ -42,11 +42,24 @@ def calc_distance_heur(pos1: tuple[int, int], pos_list: list[tuple[int, int]]) -
     return lesser
 
 
+def calc_manhatten_dist_heur(pos1: tuple[int, int], pos_list: list[tuple[int, int]]) -> int:
+    lesser = None
+
+    for pos2 in pos_list:
+        curr = abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+        if lesser is None or curr < lesser:
+            lesser = curr
+
+    return lesser
+
+
 def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> float:
     if node.piece is MapPiece.FINISH:
         return 0
+    elif node.piece is MapPiece.OUTSIDE_TRACK:
+        return 1_000_000
 
-    return calc_distance_heur((node.car.pos.x, node.car.pos.y), finish_pos_list)
+    return calc_manhatten_dist_heur((node.car.pos.x, node.car.pos.y), finish_pos_list)
 
 
 def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int,
@@ -75,36 +88,32 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
         next_node_paths = expand_track_moves(circuit, node)
 
-        graph.add_heuristic(node, 0)
-
         for (start_node, last_node, node_crashed, crash_node) in next_node_paths:
 
             if last_node.piece == MapPiece.FINISH:
                 last_node.car.set_acc_zero()
                 last_node.car.set_vel_zero()
 
-            cost: int = 25 if node_crashed else 1
-
-            # Adding corresponding edge to the play.
-            graph.add_edge(node, start_node, cost)
-
             if crash_node is not None:
-                graph.add_edge(start_node, crash_node, 0)
+                graph.add_edge(node, crash_node, 25)
                 graph.add_edge(crash_node, last_node, 0)
 
-                graph.add_heuristic(crash_node, 0)
-                graph.add_heuristic(start_node, 1_000_000)
-
             else:
-                graph.add_edge(start_node, last_node, 0)
-                graph.add_heuristic(start_node, calc_heur(last_node, finish_pos_list))
+                graph.add_edge(node, last_node, 1)
 
-            if last_node not in closed_set:
+            if last_node not in closed_set and last_node.piece is not MapPiece.FINISH:
                 open_queue.append(last_node)
 
         closed_set.add(node)
 
+    set_heuristics(graph, finish_pos_list)
+
     return graph
+
+
+def set_heuristics(graph: Graph, finish_pos_list: list[tuple[int, int]]):
+    for node in graph.graph.keys():
+        graph.heur[node] = calc_heur(node, finish_pos_list)
 
 
 def get_node_path(circuit: list[list[MapPiece]], node: CircuitNode):
