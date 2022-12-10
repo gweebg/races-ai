@@ -118,6 +118,7 @@ class Application:
         for i in range(0, len(self.path)):
             node = self.path[i]
             strg += f"Node {i}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
+            strg += f"Node {i}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
         self.console.print(strg)
         self.console.print(f"[bold]With the [green]cost[/] of: [yellow]{self.cost}[/][/]")
 
