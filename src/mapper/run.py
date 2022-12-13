@@ -64,7 +64,7 @@ class Application:
         with Progress(console=self.console) as progress:
             task = progress.add_task("[magenta bold]Generating Graph...", start=False, total=100)
 
-            graph = generate_paths_graph(circuit, start_pos[0], start_pos[1], finish_pos_list)
+            graph, closed_set = generate_paths_graph(circuit, start_pos[0], start_pos[1], finish_pos_list)
             progress.update(task, advance=50)
 
             starting_node = CircuitNode(

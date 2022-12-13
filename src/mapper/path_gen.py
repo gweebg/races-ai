@@ -63,8 +63,13 @@ def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> floa
 
 
 def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int,
-                         finish_pos_list: list[tuple[int, int]]) -> Graph:
-    graph = Graph(True)
+                         finish_pos_list: list[tuple[int, int]], graph=None, closed_set=None) -> tuple[Graph, set]:
+    if graph is None:
+        graph = Graph(True)
+
+    if closed_set is None:
+        # Set of nodes already expanded.
+        closed_set = set()
 
     car = RaceCar(
         pos=Coordinates(x=init_pos_x, y=init_pos_y)
@@ -75,9 +80,6 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
     # Queue with the nodes being processed.
     open_queue = deque()
     open_queue.append(start_node)
-
-    # Set of nodes already expanded.
-    closed_set = set()
 
     while len(open_queue) > 0:
 
@@ -108,7 +110,7 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
 
     set_heuristics(graph, finish_pos_list)
 
-    return graph
+    return graph, closed_set
 
 
 def set_heuristics(graph: Graph, finish_pos_list: list[tuple[int, int]]):
