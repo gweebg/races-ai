@@ -21,7 +21,7 @@ class Coordinates(BaseModel):
 
 class RaceCar:
     """
-    This class represents a car in the game.
+    This class represents a car in the app.
     A car has its position, velocity and acceleration.
     """
 
