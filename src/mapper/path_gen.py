@@ -122,6 +122,15 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                     case "Greedy":
                         path, cost = igraph.greedy_search(node, finish_nodes)
 
+                n_path = []
+                n_cost = 0
+                for k in range(i):
+                    a_node = ret_list[j][0][k]
+                    n_path.append(a_node)
+                    n_cost += igraph.get_weight(a_node, ret_list[j][0][k+1])
+
+                n_cost += cost
+                n_path += path
                 ret_list[j] = path, cost
                 immgraph_list[j] = igraph
 
