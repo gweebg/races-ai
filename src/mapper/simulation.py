@@ -1,4 +1,7 @@
+import sys
+
 import pygame
+import pickle
 
 from src.mapper.tiles import TileMap
 
@@ -71,3 +74,16 @@ class Simulation:
 
             self.window.blit(self.canvas, (0, 0))
             pygame.display.update()
+
+
+# def main():
+#
+#     tile_map_data = sys.argv[1]
+#     path_data = sys.argv[2]
+#
+#     tile_map: TileMap = pickle.loads(tile_map_data)
+#     path: list[tuple[int, int]] = pickle.loads(path_data)
+#
+#
+# if __name__ == "__main__":
+#     SystemExit(main())
