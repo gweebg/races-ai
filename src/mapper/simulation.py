@@ -5,7 +5,7 @@ from src.mapper.tiles import TileMap
 
 class Simulation:
 
-    def __init__(self, my_map: TileMap, path: list[tuple[int, int]]):
+    def __init__(self, my_map: TileMap, paths: list[list[tuple[int, int]]]):
 
         # PyGame Initialization #
 
@@ -21,10 +21,10 @@ class Simulation:
         # Logic Initialization #
 
         self.path_counter = 0
-        self.path_length = len(path)
+        self.path_length = len(paths)
 
         self.my_map = my_map
-        self.path = path
+        self.paths = paths
 
     def simulate(self):
 
@@ -42,24 +42,24 @@ class Simulation:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         if self.path_counter + 1 <= self.path_length:
+                            for path in self.paths:
+                                pygame.draw.circle(self.canvas,
+                                                   (245, 66, 236, 100),
+                                                   (path[self.path_counter][0] * 64 - 32,
+                                                    path[self.path_counter][1] * 64 - 32),
+                                                   5)
 
-                            pygame.draw.circle(self.canvas,
-                                               (245, 66, 236, 100),
-                                               (self.path[self.path_counter][0] * 64 - 32,
-                                                self.path[self.path_counter][1] * 64 - 32),
-                                               5)
+                                if self.path_counter > 0:
+                                    prev_x, prev_y = path[self.path_counter - 1]
+                                    curr_x, curr_y = path[self.path_counter]
 
-                            if self.path_counter > 0:
-                                prev_x, prev_y = self.path[self.path_counter - 1]
-                                curr_x, curr_y = self.path[self.path_counter]
+                                    pygame.draw.line(self.canvas,
+                                                     (245, 66, 236, 100),
+                                                     (prev_x * 64 - 32, prev_y * 64 - 32),
+                                                     (curr_x * 64 - 32, curr_y * 64 - 32),
+                                                     3)
 
-                                pygame.draw.line(self.canvas,
-                                                 (245, 66, 236, 100),
-                                                 (prev_x * 64 - 32, prev_y * 64 - 32),
-                                                 (curr_x * 64 - 32, curr_y * 64 - 32),
-                                                 3)
-
-                            self.path_counter += 1
+                                self.path_counter += 1
 
                     if event.key == pygame.K_r:
                         self.my_map.draw_map(self.canvas)

@@ -1,5 +1,6 @@
 import copy
 import math
+import random
 from collections import deque
 
 from rich.console import Console
@@ -9,19 +10,22 @@ from src.parser.parser import MapPiece
 
 from src.models.race_car import RaceCar, Coordinates
 
+from src.graph.imm_graph import ImmGraph, ImmGraphTransaction
+
 console = Console()
 
 
 class CircuitNode:
     def __init__(self, car: RaceCar, piece: MapPiece):
-        self.car = car
-        self.piece = piece
+        self.car: RaceCar = car
+        self.piece: MapPiece = piece
+        self.gen: int = 0
 
     def __hash__(self):
-        return hash(self.car) + hash(self.piece)
+        return hash(self.car) + hash(self.piece) + hash(self.gen)
 
     def __eq__(self, other):
-        return (self.car == other.car) and (self.piece == other.piece)
+        return (self.car == other.car) and (self.piece == other.piece) and (self.gen == other.gen)
 
 
 def is_out_of_bounds(car: RaceCar, circuit_x: int, circuit_y: int) -> bool:
@@ -62,7 +66,71 @@ def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> floa
     return calc_manhatten_dist_heur((node.car.pos.x, node.car.pos.y), finish_pos_list)
 
 
-def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_pos_y: int,
+def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Graph, finish_nodes: list[CircuitNode],
+                      algorithm: str) -> list[tuple[list[CircuitNode], int]]:
+    assert graph.is_directed
+    immgraph_list = [ImmGraph.wrap_graph(graph) for i in range(len(path_list))]
+    ret_list = path_list.copy()
+
+    i = 0
+    exit_b = False
+    while not exit_b:
+        inds = []
+        for j in range(len(ret_list)):
+            if len(ret_list[j][0]) > i + 1:
+                inds.append(j)
+
+        if len(inds) == 0:
+            exit_b = True
+            break
+
+        pos_map = {}
+        for j in inds:
+            path = ret_list[j][0]
+            if path[i+1].car.pos not in pos_map:
+                pos_map[path[i+1].car.pos] = path[i]
+            else:
+                igraph = immgraph_list[j]
+                trans = ImmGraphTransaction()
+                node = path[i]
+                g_node = copy.deepcopy(node)
+                g_node.gen += 1
+
+                neighbors_to, neighbors_from = igraph.get_all_associated(node)
+                for neigh in neighbors_from:
+                    weight = igraph.get_weight(neigh, node)
+                    trans.add_edge(neigh, g_node, weight)
+                    trans.remove_edge(neigh, node)
+
+                for neigh in neighbors_to:
+                    trans.add_edge(g_node, neigh, igraph.get_weight(node, neigh))
+                    for k in inds:
+                        n_node = ret_list[k][0][i+1]
+                        if n_node.car.pos == neigh.car.pos:
+                            trans.remove_edge(node, neigh)
+
+                igraph = igraph.apply_transaction(trans)
+                path = None
+                cost = None
+                match algorithm:
+                    case "DFS":
+                        path, cost = igraph.dfs_search(node, finish_nodes)
+                    case "BFS":
+                        path, cost = igraph.bfs_search(node, finish_nodes)
+                    case "AStar":
+                        path, cost = igraph.a_star_search(node, finish_nodes)
+                    case "Greedy":
+                        path, cost = igraph.greedy_search(node, finish_nodes)
+
+                ret_list[j] = path, cost
+                immgraph_list[j] = igraph
+
+        i += 1
+
+    return ret_list
+
+
+def generate_paths_graph(circuit: list[list[MapPiece]], start_pos_list: list[tuple[int, int]],
                          finish_pos_list: list[tuple[int, int]], graph=None, closed_set=None) -> tuple[Graph, set]:
     if graph is None:
         graph = Graph(True)
@@ -71,15 +139,17 @@ def generate_paths_graph(circuit: list[list[MapPiece]], init_pos_x: int, init_po
         # Set of nodes already expanded.
         closed_set = set()
 
-    car = RaceCar(
-        pos=Coordinates(x=init_pos_x, y=init_pos_y)
-    )
-
-    start_node = CircuitNode(car, circuit[init_pos_y][init_pos_x])
-
     # Queue with the nodes being processed.
     open_queue = deque()
-    open_queue.append(start_node)
+
+    for start_pos in start_pos_list:
+        start_node = CircuitNode(
+            RaceCar(
+                pos=Coordinates(x=start_pos[0], y=start_pos[1])
+            ),
+            circuit[start_pos[1]][start_pos[0]]
+        )
+        open_queue.append(start_node)
 
     while len(open_queue) > 0:
 

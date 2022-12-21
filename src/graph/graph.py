@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Optional
+from typing import Optional, Any
 from queue import Queue
 
 
@@ -15,13 +15,20 @@ class Graph:
         if val1 not in self.graph:
             self.graph[val1] = {}
 
-        self.graph[val1][val2] = weight
+        self.graph[val1][val2] = weight, True
 
         if val2 not in self.graph:
             self.graph[val2] = {}
 
         if not self.is_directed:
-            self.graph[val2][val1] = weight
+            self.graph[val2][val1] = weight, True
+        elif val1 not in self.graph[val2]:
+            self.graph[val2][val1] = weight, False
+
+    def remove_edge(self, val1, val2) -> None:
+        del self.graph[val1][val2]
+        if not self.is_directed:
+            del self.graph[val2][val1]
 
     def add_val(self, val) -> None:
         if val not in self.graph:
@@ -32,7 +39,7 @@ class Graph:
 
     def get_weight(self, val1, val2) -> int | None:
         if val1 in self.graph:
-            return self.graph[val1][val2]
+            return self.graph[val1][val2][0]
         else:
             return None
 
@@ -51,15 +58,26 @@ class Graph:
         cost = 0
         assert len(path) >= 2
         for i in range(1, len(path)):
-            cost += self.graph[path[i - 1]][path[i]]
+            cost += self.graph[path[i - 1]][path[i]][0]
 
         return cost
 
     def get_neighbours(self, nodo) -> list:
         lista = []
-        for (adjacente, peso) in self.graph[nodo].items():
+        for (adjacente, (peso, b)) in self.graph[nodo].items():
             lista.append((adjacente, peso))
         return lista
+
+    def get_all_associated(self, val) -> tuple[list[Any], list[Any]]:
+        lista_ir = []
+        lista_vir = []
+        for (adjacente, (peso, b)) in self.graph[val].items():
+            lista_ir.append((adjacente, peso))
+            if val in self.graph[adjacente]:
+                (vadj, (peso, valid)) = self.graph[adjacente][val]
+                if valid:
+                    lista_vir.append((adjacente, peso))
+        return lista_ir, lista_vir
 
     def add_heuristic(self, val, heur):
         self.heur[val] = heur

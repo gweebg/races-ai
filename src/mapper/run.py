@@ -20,21 +20,20 @@ class Application:
 
         self.algorithm = None
         self.tile_map = None
-        self.path = None
-        self.cost = None
+        self.paths = []
 
         self.maps_path = map_folder_path
         self.maps: list[str] = self.get_maps(map_folder_path)
 
         self.console = Console()
 
-        self.graph: tuple[Graph, CircuitNode, list[CircuitNode]] = self.build_graph()
+        self.graph, self.start_nodes_list, self.end_nodes_list = self.build_graph()
 
         self.algorithm_map: dict[str, Callable[[CircuitNode, list[CircuitNode]], Optional[tuple[list, int]]]] = {
-            "DFS": self.graph[0].dfs_search,
-            "BFS": self.graph[0].bfs_search,
-            "Greedy": self.graph[0].greedy_search,
-            "AStar": self.graph[0].a_star_search
+            "DFS": self.graph.dfs_search,
+            "BFS": self.graph.bfs_search,
+            "Greedy": self.graph.greedy_search,
+            "AStar": self.graph.a_star_search
         }
 
     def get_maps(self, maps_path: str) -> list[str]:
@@ -56,21 +55,23 @@ class Application:
 
         return TileMap(self.maps_path + f"/{self.maps[chosen_map]}"), f"{self.maps_path}/{self.maps[chosen_map]}"
 
-    def prompt_graph(self, map_path: str) -> tuple[Graph, CircuitNode, list[CircuitNode]]:
+    def prompt_graph(self, map_path: str) -> tuple[Graph, list[CircuitNode], list[CircuitNode]]:
 
-        circuit, start_pos, finish_pos_list = parse_map(map_path)
+        circuit, start_pos_list, finish_pos_list = parse_map(map_path)
         self.console.print("\n")
 
         with Progress(console=self.console) as progress:
             task = progress.add_task("[magenta bold]Generating Graph...", start=False, total=100)
 
-            graph, closed_set = generate_paths_graph(circuit, start_pos[0], start_pos[1], finish_pos_list)
+            graph, closed_set = generate_paths_graph(circuit, start_pos_list, finish_pos_list)
             progress.update(task, advance=50)
 
-            starting_node = CircuitNode(
-                RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
-                circuit[start_pos[1]][start_pos[0]]
-            )
+            start_nodes: list[CircuitNode] = list(map(
+                lambda pos:
+                CircuitNode(RaceCar(pos=Coordinates(x=pos[0], y=pos[1])), circuit[pos[1]][pos[0]]),
+                start_pos_list
+            ))
+
             progress.update(task, advance=20)
 
             finish_nodes: list[CircuitNode] = list(map(
@@ -82,9 +83,9 @@ class Application:
             progress.update(task, description="[blue]Done, Please Wait...", advance=30)
             progress.stop_task(task)
 
-        return graph, starting_node, finish_nodes
+        return graph, start_nodes, finish_nodes
 
-    def build_graph(self) -> tuple[Graph, CircuitNode, list[CircuitNode]]:
+    def build_graph(self) -> tuple[Graph, list[CircuitNode], list[CircuitNode]]:
 
         self.tile_map, map_path = self.prompt_map()
         return self.prompt_graph(map_path)
@@ -113,14 +114,18 @@ class Application:
         return option
 
     def print_path(self):
-        self.console.print("Found this path:")
         strg = ""
-        for i in range(0, len(self.path)):
-            node = self.path[i]
-            strg += f"Node {i}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
-            strg += f"Node {i}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
+        for i in range(0, len(self.paths)):
+            path = self.paths[i][0]
+            cost = path[i][1]
+            strg += f"Path {i}:\nCost: {cost}\n"
+            for j in range(0, len(path)):
+                node = path[j]
+                strg += f"Node {j}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
+                strg += f"Node {j}: pos: {node.car.pos}, acc: {node.car.acc}, vel: {node.car.vel}\n"
+            strg += "\n"
+
         self.console.print(strg)
-        self.console.print(f"[bold]With the [green]cost[/] of: [yellow]{self.cost}[/][/]")
 
     @staticmethod
     def path_to_tuple(path: list[CircuitNode]) -> list[tuple[int, int]]:
@@ -130,14 +135,15 @@ class Application:
 
         self.console.print("\n", end='')
 
-        self.path = None
-
         self.algorithm: str = self.prompt_algorithm()
         algorithm_func: Callable = self.algorithm_map.get(self.algorithm)
 
-        self.path, self.cost = algorithm_func(self.graph[1], self.graph[2])
+        tuple_paths = []
 
-        tuple_path = self.path_to_tuple(self.path)
+        for s_node in self.start_nodes_list:
+            path = algorithm_func(s_node, self.end_nodes_list)
+            self.paths.append(path)
+            tuple_paths.append(self.path_to_tuple(path[0]))
 
         reset, restart = False, False
 
@@ -145,16 +151,19 @@ class Application:
 
             if reset:
                 self.algorithm: str = self.prompt_algorithm()
+                self.paths = []
+                tuple_paths = []
                 algorithm_func: Callable = self.algorithm_map.get(self.algorithm)
 
-                self.path, self.cost = algorithm_func(self.graph[1], self.graph[2])
-
-                tuple_path = self.path_to_tuple(self.path)
+                for s_node in self.start_nodes_list:
+                    path = algorithm_func(s_node, self.end_nodes_list)
+                    self.paths.append(path)
+                    tuple_paths.append(self.path_to_tuple(path[0]))
 
             next_action: int = self.prompt_action()
 
             if next_action == 0:
-                Simulation(self.tile_map, tuple_path).simulate()
+                Simulation(self.tile_map, tuple_paths).simulate()
                 reset = False
 
             if next_action == 1:
