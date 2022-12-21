@@ -1,6 +1,6 @@
 from typing import Callable, Optional
 
-from src.mapper.path_gen import generate_paths_graph, CircuitNode
+from src.mapper.path_gen import generate_paths_graph, CircuitNode, resolve_collisions
 from src.mapper.simulation import Simulation
 from src.mapper.tiles import TileMap
 
@@ -23,17 +23,17 @@ class Simulator:
         self.cost = None
 
         self.tile_map = TileMap(self.map)
-        self.graph: tuple[Graph, CircuitNode, list[CircuitNode]] = self.build_graph(self.map)
+        self.graph, self.start_nodes, self.finish_nodes = self.build_graph(self.map)
 
         self.algorithm_map: dict[str, Callable[[CircuitNode, list[CircuitNode]], Optional[tuple[list, int]]]] = {
-            "DFS": self.graph[0].dfs_search,
-            "BFS": self.graph[0].bfs_search,
-            "Greedy": self.graph[0].greedy_search,
-            "A*": self.graph[0].a_star_search
+            "DFS": self.graph.dfs_search,
+            "BFS": self.graph.bfs_search,
+            "Greedy": self.graph.greedy_search,
+            "A*": self.graph.a_star_search
         }
 
     @staticmethod
-    def build_graph(map_path: str) -> tuple[Graph, CircuitNode, list[CircuitNode]]:
+    def build_graph(map_path: str) -> tuple[Graph, list[CircuitNode], list[CircuitNode]]:
         """
         Given the path to a map, this method generates the corresponding graph.
         This graph contains every possible play in the game, for every position.
@@ -41,14 +41,15 @@ class Simulator:
         :param map_path: Map path.
         """
 
-        circuit, start_pos, finish_pos_list = parse_map(map_path)
+        circuit, start_pos_list, finish_pos_list = parse_map(map_path)
 
-        graph, closed_set = generate_paths_graph(circuit, start_pos[0], start_pos[1], finish_pos_list)
+        graph, closed_set = generate_paths_graph(circuit, start_pos_list, finish_pos_list)
 
-        starting_node = CircuitNode(
-            RaceCar(pos=Coordinates(x=start_pos[0], y=start_pos[1])),
-            circuit[start_pos[1]][start_pos[0]]
-        )
+        start_nodes: list[CircuitNode] = list(map(
+            lambda pos:
+            CircuitNode(RaceCar(pos=Coordinates(x=pos[0], y=pos[1])), circuit[pos[1]][pos[0]]),
+            start_pos_list
+        ))
 
         finish_nodes: list[CircuitNode] = list(map(
             lambda pos:
@@ -56,7 +57,7 @@ class Simulator:
             finish_pos_list
         ))
 
-        return graph, starting_node, finish_nodes
+        return graph, start_nodes, finish_nodes
 
     @staticmethod
     def path_to_tuple(path: list[CircuitNode]) -> list[tuple[int, int]]:
@@ -78,12 +79,31 @@ class Simulator:
         # Getting the text corresponding algorithm function.
         algorithm_func: Callable = self.algorithm_map.get(self.algorithm)
 
-        # Getting the result path and cost.
-        self.path, self.cost = algorithm_func(self.graph[1], self.graph[2])
+        s_node_iter = looping_range(len(self.start_nodes))
+        paths: list[tuple[list[CircuitNode], int]] = []
 
-        # Cleaning up the path to only get the plays and not every node visited.
-        tuple_path = self.path_to_tuple(self.path)
+        for i in range(self.cars):
+            s_node = self.start_nodes[next(s_node_iter)]
+            path = algorithm_func(s_node, self.finish_nodes)
+            paths.append(path)
+
+        paths = resolve_collisions(paths, self.graph, self.finish_nodes, self.algorithm)
+
+        tuple_paths: list[tuple[list[tuple[int, int]], int]] = []
+
+        for path in paths:
+            t_path = self.path_to_tuple(path[0])
+            tuple_paths.append((t_path, path[1]))
 
         # Running the simulation.
         # Simulation(self.tile_map, tuple_path).simulate()
-        return tuple_path, self.cost, self.tile_map
+        return tuple_paths, self.tile_map
+
+
+def looping_range(max_i: int = 0):
+    it = 0
+    while True:
+        if it == max_i:
+            it = 0
+        yield it
+        it += 1

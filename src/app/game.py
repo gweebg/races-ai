@@ -35,7 +35,7 @@ class Game:
         self.algorithm_index = 0
 
         # Possible car numbers, and how many cars are selected.
-        self.cars = [1, 2]
+        self.cars = [1, 2, 3]
         self.car_index = 0
 
         # Represents the state of the application, if it's running the simulation or not.
@@ -164,25 +164,27 @@ class Game:
 
                             print("Right")
 
-                            if path_counter + 1 <= len(path):
+                            for path in paths:
 
-                                pygame.draw.circle(self.screen,
-                                                   (245, 66, 236, 100),
-                                                   (path[path_counter][0] * 64 - 32,
-                                                    path[path_counter][1] * 64 - 32),
-                                                   5)
+                                if path_counter + 1 <= len(path[0]):
 
-                                if path_counter > 0:
-                                    prev_x, prev_y = path[path_counter - 1]
-                                    curr_x, curr_y = path[path_counter]
+                                    pygame.draw.circle(self.screen,
+                                                       (245, 66, 236, 100),
+                                                       (path[0][path_counter][0] * 64 - 32,
+                                                        path[0][path_counter][1] * 64 - 32),
+                                                       5)
 
-                                    pygame.draw.line(self.screen,
-                                                     (245, 66, 236, 100),
-                                                     (prev_x * 64 - 32, prev_y * 64 - 32),
-                                                     (curr_x * 64 - 32, curr_y * 64 - 32),
-                                                     3)
+                                    if path_counter > 0:
+                                        prev_x, prev_y = path[0][path_counter - 1]
+                                        curr_x, curr_y = path[0][path_counter]
 
-                                path_counter += 1
+                                        pygame.draw.line(self.screen,
+                                                         (245, 66, 236, 100),
+                                                         (prev_x * 64 - 32, prev_y * 64 - 32),
+                                                         (curr_x * 64 - 32, curr_y * 64 - 32),
+                                                         3)
+
+                                    path_counter += 1
 
             # Main Menu Display, if the simulation is not running!
             if not running:
@@ -267,7 +269,7 @@ class Game:
             if self.simulating and not running:
 
                 if not running:
-                    path, cost, tile_map = self.compute_resolution()
+                    paths, tile_map = self.compute_resolution()
                     path_counter = 0
 
                     running = True

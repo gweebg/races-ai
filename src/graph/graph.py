@@ -74,9 +74,9 @@ class Graph:
         for (adjacente, (peso, b)) in self.graph[val].items():
             lista_ir.append((adjacente, peso))
             if val in self.graph[adjacente]:
-                (vadj, (peso, valid)) = self.graph[adjacente][val]
+                (peso2, valid) = self.graph[adjacente][val]
                 if valid:
-                    lista_vir.append((adjacente, peso))
+                    lista_vir.append((adjacente, peso2))
         return lista_ir, lista_vir
 
     def add_heuristic(self, val, heur):

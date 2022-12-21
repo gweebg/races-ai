@@ -1,6 +1,6 @@
 from typing import Any
-from graph import Graph
 from enum import Enum
+from graph.graph import Graph
 
 
 class TransactionType(Enum):
