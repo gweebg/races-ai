@@ -80,11 +80,16 @@ class Simulator:
         algorithm_func: Callable = self.algorithm_map.get(self.algorithm)
 
         s_node_iter = looping_range(len(self.start_nodes))
+        s_node_paths = {}
         paths: list[tuple[list[CircuitNode], int]] = []
 
         for i in range(self.cars):
             s_node = self.start_nodes[next(s_node_iter)]
-            path = algorithm_func(s_node, self.finish_nodes)
+            if s_node in s_node_paths:
+                path = s_node_paths[s_node]
+            else:
+                path = algorithm_func(s_node, self.finish_nodes)
+                s_node_paths[s_node] = path
             paths.append(path)
 
         paths = resolve_collisions(paths, self.graph, self.finish_nodes, self.algorithm)

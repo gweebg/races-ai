@@ -70,10 +70,17 @@ def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> floa
 
 
 def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Graph, finish_nodes: list[CircuitNode],
-                      algorithm: str) -> list[tuple[list[CircuitNode], int]]:
+                       algorithm: str) -> list[tuple[list[CircuitNode], int]]:
     assert graph.is_directed
     immgraph_list = [ImmGraph.wrap_graph(graph) for i in range(len(path_list))]
     ret_list = path_list.copy()
+    #edge_cost_path_list: list[list[int]] = []
+
+    #for path, t_cost in path_list:
+    #    cost_list = []
+    #    for i in range(1, len(path)):
+    #        cost_list.append(graph.get_weight(path[i-1], path[i]))
+    #    edge_cost_path_list.append(cost_list)
 
     i = 0
     exit_b = False
@@ -90,8 +97,8 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
         pos_map = {}
         for j in inds:
             path = ret_list[j][0]
-            if path[i+1].car.pos not in pos_map:
-                pos_map[path[i+1].car.pos] = path[i]
+            if path[i + 1].car.pos not in pos_map:
+                pos_map[path[i + 1].car.pos] = path[i]
             else:
                 igraph = immgraph_list[j]
                 trans = ImmGraphTransaction()
@@ -101,9 +108,6 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                 trans.add_val(g_node)
                 trans.add_heur(g_node, igraph.get_heuristic(node))
 
-                for k in range(i+1, len(path)):
-                    if path[k] == node:
-                        path[k] = g_node
 
                 file = open("./log.txt", "w")
 
@@ -121,37 +125,42 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                     for k in inds:
                         if k == j:
                             continue
-                        n_node = ret_list[k][0][i+1]
-                        if n_node.car.pos == neigh.car.pos and n_node.car.pos not in rem_pos_set:
+                        n_node = ret_list[k][0][i + 1]
+                        if n_node.car.pos == neigh.car.pos and n_node.car.pos not in rem_pos_set and node.piece != MapPiece.OUTSIDE_TRACK:
                             print(f"t:removing to edge:{node} -> {neigh}", file=file)
                             trans.remove_edge(node, neigh)
                             rem_pos_set.add(n_node.car.pos)
 
                 print("applying transaction", file=file)
+                file.flush()
+                file.close()
                 igraph = igraph.apply_transaction(trans)
-                path = None
+                s_path = None
                 cost = None
                 match algorithm:
                     case "DFS":
-                        path, cost = igraph.dfs_search(node, finish_nodes)
+                        s_path, cost = igraph.dfs_search(node, finish_nodes)
                     case "BFS":
-                        path, cost = igraph.bfs_search(node, finish_nodes)
+                        s_path, cost = igraph.bfs_search(node, finish_nodes)
                     case "A*":
-                        path, cost = igraph.a_star_search(node, finish_nodes)
+                        s_path, cost = igraph.a_star_search(node, finish_nodes)
                     case "Greedy":
-                        path, cost = igraph.greedy_search(node, finish_nodes)
+                        s_path, cost = igraph.greedy_search(node, finish_nodes)
                     case _:
                         raise RuntimeError(f"received unknown algo:{algorithm}")
 
                 n_path = []
                 n_cost = 0
-                for k in range(i):  # [1,2,3,4] [2,7,8] i=1; k=0 [1]; [1] + [2,7,8]
-                    a_node = ret_list[j][0][k]
-                    n_path.append(a_node)
 
-                n_path += path
+                for k in range(i):  # [1,2,3,4] [2,7,8] i=1; k=0 [1]; [1] + [2,7,8]
+                    if path[k] == node:
+                        path[k] = g_node
+                    n_path.append(path[k])
+
+                s_path[0] = g_node
+                n_path += s_path
                 for k in range(1, i):
-                    n_cost += igraph.get_weight(n_path[k-1], n_path[k])
+                    n_cost += igraph.get_weight(n_path[k - 1], n_path[k])
 
                 ret_list[j] = (n_path, n_cost)
                 immgraph_list[j] = igraph
