@@ -74,13 +74,6 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
     assert graph.is_directed
     immgraph_list = [ImmGraph.wrap_graph(graph) for i in range(len(path_list))]
     ret_list = path_list.copy()
-    #edge_cost_path_list: list[list[int]] = []
-
-    #for path, t_cost in path_list:
-    #    cost_list = []
-    #    for i in range(1, len(path)):
-    #        cost_list.append(graph.get_weight(path[i-1], path[i]))
-    #    edge_cost_path_list.append(cost_list)
 
     i = 0
     exit_b = False
@@ -108,32 +101,22 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                 trans.add_val(g_node)
                 trans.add_heur(g_node, igraph.get_heuristic(node))
 
-
-                file = open("./log.txt", "w")
-
                 neighbors_to, neighbors_from = igraph.get_all_associated(node)
                 for neigh, weight in neighbors_from:
-                    print(f"t:adding from edge:{neigh} -> {g_node}", file=file)
                     trans.add_edge(neigh, g_node, weight)
-                    print(f"t:removing from edge:{neigh} -> {node}", file=file)
                     trans.remove_edge(neigh, node)
 
                 rem_pos_set = set()
                 for neigh, weight in neighbors_to:
-                    print(f"t:adding to edge:{g_node} -> {neigh}", file=file)
                     trans.add_edge(g_node, neigh, weight)
                     for k in inds:
                         if k == j:
                             continue
                         n_node = ret_list[k][0][i + 1]
                         if n_node.car.pos == neigh.car.pos and n_node.car.pos not in rem_pos_set and node.piece != MapPiece.OUTSIDE_TRACK:
-                            print(f"t:removing to edge:{node} -> {neigh}", file=file)
                             trans.remove_edge(node, neigh)
                             rem_pos_set.add(n_node.car.pos)
 
-                print("applying transaction", file=file)
-                file.flush()
-                file.close()
                 igraph = igraph.apply_transaction(trans)
                 s_path = None
                 cost = None
