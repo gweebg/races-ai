@@ -2,6 +2,7 @@ import os
 import pickle
 import subprocess
 import sys
+import threading
 
 import pygame
 
@@ -92,14 +93,19 @@ class Game:
 
         self.simulating = True
 
-    def compute_resolution(self):
+    def compute_resolution(self, threading_event: threading.Event, output: list):
 
         map_path = self.map_path + self.maps[self.map_index].lower().replace(" ", "_") + ".txt"
 
         algorithm = self.algorithms[self.algorithm_index]
         cars = self.cars[self.car_index]
 
-        return Simulator(map_path, algorithm, cars).get_resources()
+        paths, tile_map = Simulator(map_path, algorithm, cars).get_resources()
+
+        output.append(paths)
+        output.append(tile_map)
+
+        threading_event.set()
 
     def run(self):
 
@@ -140,6 +146,7 @@ class Game:
         credit_font_smaller = pygame.font.Font(None, 15)
 
         running = False
+        processed = False
 
         while True:
 
@@ -277,16 +284,28 @@ class Game:
 
             # If the start button is clicked, then we set the state to simulating,
             # and compute de result for the selected items. We also set the running state to True.
-            if self.simulating and not running:
+
+            if self.simulating:
 
                 if not running:
-                    paths, tile_map = self.compute_resolution()
+
+                    results = []
+                    finish_event = threading.Event()
+
+                    thread = threading.Thread(target=self.compute_resolution, args=(finish_event, results))
+                    thread.start()
+
                     path_counter = 0
 
                     running = True
 
+
+                if running and self.simulating and finish_event and finish_event.is_set() and not processed:
+
+                    paths, tile_map = results[0], results[1]
                     self.screen = pygame.display.set_mode((tile_map.map_w, tile_map.map_h))
                     self.screen.blit(tile_map.map_surface, (0, 0))
+                    processed = True
 
             # Refreshing the screen (60 fps).
             pygame.display.update()
