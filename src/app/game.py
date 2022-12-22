@@ -35,8 +35,14 @@ class Game:
         self.algorithm_index = 0
 
         # Possible car numbers, and how many cars are selected.
-        self.cars = [1, 2, 3]
+        self.cars = [1, 2, 3, 4]
         self.car_index = 0
+        self.car_colors = [
+            (255, 0, 0, 100),
+            (0, 0, 255, 100),
+            (245, 66, 236, 100),
+            (255, 255, 255, 150)
+        ]
 
         # Represents the state of the application, if it's running the simulation or not.
         self.simulating = False
@@ -164,12 +170,13 @@ class Game:
 
                             print("Right")
 
-                            for path in paths:
+                            for i in range(len(paths)):
+                                path = paths[i]
 
                                 if path_counter + 1 <= len(path[0]):
 
                                     pygame.draw.circle(self.screen,
-                                                       (245, 66, 236, 100),
+                                                       self.car_colors[i],
                                                        (path[0][path_counter][0] * 64 - 32,
                                                         path[0][path_counter][1] * 64 - 32),
                                                        5)
@@ -179,12 +186,12 @@ class Game:
                                         curr_x, curr_y = path[0][path_counter]
 
                                         pygame.draw.line(self.screen,
-                                                         (245, 66, 236, 100),
+                                                         self.car_colors[i],
                                                          (prev_x * 64 - 32, prev_y * 64 - 32),
                                                          (curr_x * 64 - 32, curr_y * 64 - 32),
                                                          3)
 
-                                    path_counter += 1
+                            path_counter += 1
 
             # Main Menu Display, if the simulation is not running!
             if not running:

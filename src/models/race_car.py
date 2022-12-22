@@ -45,6 +45,9 @@ class RaceCar:
         self.pos.x += self.vel.x
         self.pos.y += self.vel.y
 
+    def __str__(self):
+        return f"pos:{self.pos}, acc:{self.acc}, vel:{self.vel}"
+
     def update_vel(self):
         """
         Only update the velocity of the car according to its current acceleration.

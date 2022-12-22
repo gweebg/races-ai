@@ -27,6 +27,9 @@ class CircuitNode:
     def __eq__(self, other):
         return (self.car == other.car) and (self.piece == other.piece) and (self.gen == other.gen)
 
+    def __str__(self):
+        return f"car:{self.car}; piece:{self.piece}; gen:{self.gen}"
+
 
 def is_out_of_bounds(car: RaceCar, circuit_x: int, circuit_y: int) -> bool:
     if (0 <= car.pos.x < circuit_x) and (0 <= car.pos.y < circuit_y):
@@ -95,20 +98,36 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                 node = path[i]
                 g_node = copy.deepcopy(node)
                 g_node.gen += 1
+                trans.add_val(g_node)
+                trans.add_heur(g_node, igraph.get_heuristic(node))
+
+                for k in range(i+1, len(path)):
+                    if path[k] == node:
+                        path[k] = g_node
+
+                file = open("./log.txt", "w")
 
                 neighbors_to, neighbors_from = igraph.get_all_associated(node)
-                for neigh in neighbors_from:
-                    weight = igraph.get_weight(neigh, node)
+                for neigh, weight in neighbors_from:
+                    print(f"t:adding from edge:{neigh} -> {g_node}", file=file)
                     trans.add_edge(neigh, g_node, weight)
+                    print(f"t:removing from edge:{neigh} -> {node}", file=file)
                     trans.remove_edge(neigh, node)
 
-                for neigh in neighbors_to:
-                    trans.add_edge(g_node, neigh, igraph.get_weight(node, neigh))
+                rem_pos_set = set()
+                for neigh, weight in neighbors_to:
+                    print(f"t:adding to edge:{g_node} -> {neigh}", file=file)
+                    trans.add_edge(g_node, neigh, weight)
                     for k in inds:
+                        if k == j:
+                            continue
                         n_node = ret_list[k][0][i+1]
-                        if n_node.car.pos == neigh.car.pos:
+                        if n_node.car.pos == neigh.car.pos and n_node.car.pos not in rem_pos_set:
+                            print(f"t:removing to edge:{node} -> {neigh}", file=file)
                             trans.remove_edge(node, neigh)
+                            rem_pos_set.add(n_node.car.pos)
 
+                print("applying transaction", file=file)
                 igraph = igraph.apply_transaction(trans)
                 path = None
                 cost = None
@@ -117,21 +136,24 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                         path, cost = igraph.dfs_search(node, finish_nodes)
                     case "BFS":
                         path, cost = igraph.bfs_search(node, finish_nodes)
-                    case "AStar":
+                    case "A*":
                         path, cost = igraph.a_star_search(node, finish_nodes)
                     case "Greedy":
                         path, cost = igraph.greedy_search(node, finish_nodes)
+                    case _:
+                        raise RuntimeError(f"received unknown algo:{algorithm}")
 
                 n_path = []
                 n_cost = 0
-                for k in range(i):
+                for k in range(i):  # [1,2,3,4] [2,7,8] i=1; k=0 [1]; [1] + [2,7,8]
                     a_node = ret_list[j][0][k]
                     n_path.append(a_node)
-                    n_cost += igraph.get_weight(a_node, ret_list[j][0][k+1])
 
-                n_cost += cost
                 n_path += path
-                ret_list[j] = path, cost
+                for k in range(1, i):
+                    n_cost += igraph.get_weight(n_path[k-1], n_path[k])
+
+                ret_list[j] = (n_path, n_cost)
                 immgraph_list[j] = igraph
 
         i += 1

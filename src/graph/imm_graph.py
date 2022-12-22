@@ -1,6 +1,6 @@
 from typing import Any
 from enum import Enum
-from graph.graph import Graph
+from src.graph.graph import Graph
 
 
 class TransactionType(Enum):
@@ -25,7 +25,7 @@ class ImmGraphTransaction:
         return self
 
     def add_val(self, val) -> 'ImmGraphTransaction':
-        self.t_data.append((TransactionType.ADD_VAL, tuple(val)))
+        self.t_data.append((TransactionType.ADD_VAL, (val, )))
         return self
 
     def add_heur(self, val, heur) -> 'ImmGraphTransaction':
@@ -42,7 +42,9 @@ class ImmGraph(Graph):
         igraph = ImmGraph(self.is_directed)
         igraph.graph = self.graph
         igraph.heur = self.heur
+        igraph.reverse_graph = self.reverse_graph
         graph_copy = False
+        reverse_graph_copy = False
         heur_copy = False
 
         for trans_type, args in transaction.t_data:
@@ -51,12 +53,18 @@ class ImmGraph(Graph):
                     if not graph_copy:
                         igraph.graph = igraph.graph.copy()
                         graph_copy = True
+                    if not reverse_graph_copy and self.is_directed:
+                        igraph.reverse_graph = igraph.reverse_graph.copy()
+                        reverse_graph_copy = True
                     igraph.__priv_add_edge(*args)
 
                 case TransactionType.REM_EDGE:
                     if not graph_copy:
                         igraph.graph = igraph.graph.copy()
                         graph_copy = True
+                    if not reverse_graph_copy and self.is_directed:
+                        igraph.reverse_graph = igraph.reverse_graph.copy()
+                        reverse_graph_copy = True
                     igraph.__priv_remove_edge(*args)
 
                 case TransactionType.ADD_VAL:
@@ -76,6 +84,11 @@ class ImmGraph(Graph):
     def add_edge(self, val1, val2, weight) -> 'ImmGraph':
         igraph = ImmGraph(self.is_directed)
         igraph.graph = self.graph.copy()
+        if self.is_directed:
+            igraph.reverse_graph = self.reverse_graph.copy()
+        else:
+            igraph.reverse_graph = self.reverse_graph
+
         igraph.heur = self.heur
         igraph.__priv_add_edge(val1, val2, weight)
         return igraph
@@ -94,10 +107,18 @@ class ImmGraph(Graph):
         if not self.is_directed:
             self.graph[val2] = self.graph[val2].copy()
             self.graph[val2][val1] = weight
+        else:
+            if val2 not in self.reverse_graph:
+                self.reverse_graph[val2] = {}
+            else:
+                self.reverse_graph[val2] = self.reverse_graph[val2].copy()
+
+            self.reverse_graph[val2][val1] = weight
 
     def add_val(self, val) -> 'ImmGraph':
         igraph = ImmGraph(self.is_directed)
         igraph.graph = self.graph.copy()
+        igraph.reverse_graph = self.reverse_graph
         igraph.heur = self.heur
         igraph.__priv_add_val(val)
         return igraph
@@ -110,6 +131,7 @@ class ImmGraph(Graph):
         igraph = ImmGraph(self.is_directed)
         igraph.graph = self.graph
         igraph.heur = self.heur.copy()
+        igraph.reverse_graph = self.reverse_graph
         igraph.__priv_add_heuristic(val, heur)
         return igraph
 
@@ -120,6 +142,7 @@ class ImmGraph(Graph):
         igraph = ImmGraph(self.is_directed)
         igraph.graph = self.graph.copy()
         igraph.heur = self.heur
+        igraph.reverse_graph = self.reverse_graph.copy()
         igraph.__priv_remove_edge(val1, val2)
         return igraph
 
@@ -129,10 +152,14 @@ class ImmGraph(Graph):
         if not self.is_directed:
             self.graph[val2] = self.graph[val2].copy()
             del self.graph[val2][val1]
+        else:
+            self.reverse_graph[val2] = self.reverse_graph[val2].copy()
+            del self.reverse_graph[val2][val1]
 
     @staticmethod
     def wrap_graph(graph: Graph) -> 'ImmGraph':
         igraph = ImmGraph(graph.is_directed)
         igraph.graph = graph.graph
         igraph.heur = graph.heur
+        igraph.reverse_graph = graph.reverse_graph
         return igraph
