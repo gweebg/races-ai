@@ -110,19 +110,19 @@ class Button:
         :return: None
         """
 
+        self.disabled = True
         self.top_color = DST_COLOR
         self.bottom_color = DSB_COLOR
-        self.disabled = True
 
     def enable(self):
         """
         Enable the button turning it back to normal!
-        :return:
+        :return: None
         """
 
+        self.disabled = False
         self.top_color = TOP_COLOR
         self.bottom_color = BOT_COLOR
-        self.disabled = False
 
     def draw(self) -> None:
         """

@@ -83,10 +83,10 @@ class Game:
         list_selection: list = getattr(self, where_list)
         index: int = getattr(self, where_index)
 
-        if index == 1:
-            setattr(self, where_index, 0)
-        else:
+        if index == 0:
             setattr(self, where_index, len(list_selection) - 1)
+        else:
+            setattr(self, where_index, index - 1)
 
     def start_handle(self):
 
@@ -168,8 +168,6 @@ class Game:
 
                         if event.key == pygame.K_RIGHT:
 
-                            print("Right")
-
                             for i in range(len(paths)):
                                 path = paths[i]
 
@@ -231,6 +229,7 @@ class Game:
                 next_car.draw()
 
                 # Drawing the selection of algorithms.
+
                 a_x, a_width = self.add_text(
                     self.algorithms[self.algorithm_index],
                     (self.width / 2, self.height / 2 + - 60 + 20 + 15)
@@ -241,6 +240,11 @@ class Game:
 
                 prev_alg.draw()
                 next_alg.draw()
+
+                if self.car_index > 0 and self.algorithms[self.algorithm_index] == "DFS":
+                    start.disable()
+                else:
+                    start.enable()
 
                 # Drawing the credits!
                 text_surf = credit_font.render("Developed by:", True, '#545454')
