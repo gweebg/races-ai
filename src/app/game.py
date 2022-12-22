@@ -100,7 +100,11 @@ class Game:
         algorithm = self.algorithms[self.algorithm_index]
         cars = self.cars[self.car_index]
 
+        print("COMPUTING!")
+
         paths, tile_map = Simulator(map_path, algorithm, cars).get_resources()
+
+        print("DONE!")
 
         output.append(paths)
         output.append(tile_map)
@@ -146,7 +150,7 @@ class Game:
         credit_font_smaller = pygame.font.Font(None, 15)
 
         running = False
-        processed = False
+        processing = False
 
         while True:
 
@@ -289,23 +293,28 @@ class Game:
 
                 if not running:
 
-                    results = []
-                    finish_event = threading.Event()
+                    if not processing:
 
-                    thread = threading.Thread(target=self.compute_resolution, args=(finish_event, results))
-                    thread.start()
+                        results = []
+                        finish_event = threading.Event()
 
-                    path_counter = 0
+                        thread = threading.Thread(target=self.compute_resolution, args=(finish_event, results))
+                        thread.start()
 
-                    running = True
+                        path_counter = 0
 
+                        running = True
+                        processing = True
 
-                if running and self.simulating and finish_event and finish_event.is_set() and not processed:
+                else:
+                    if finish_event.is_set():
+                        processing = False
 
-                    paths, tile_map = results[0], results[1]
-                    self.screen = pygame.display.set_mode((tile_map.map_w, tile_map.map_h))
-                    self.screen.blit(tile_map.map_surface, (0, 0))
-                    processed = True
+                        paths, tile_map = results[0], results[1]
+                        self.screen = pygame.display.set_mode((tile_map.map_w, tile_map.map_h))
+                        self.screen.blit(tile_map.map_surface, (0, 0))
+
+                        finish_event.clear()
 
             # Refreshing the screen (60 fps).
             pygame.display.update()
