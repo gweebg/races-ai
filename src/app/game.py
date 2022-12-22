@@ -1,12 +1,9 @@
 import os
-import pickle
-import subprocess
 import sys
 import threading
 
 import pygame
 
-from mapper.simulation import Simulation
 from src.app.button import Button
 from src.mapper.simulator import Simulator
 
@@ -252,10 +249,10 @@ class Game:
                 prev_alg.draw()
                 next_alg.draw()
 
-                if self.car_index > 0 and self.algorithms[self.algorithm_index] == "DFS":
-                    start.disable()
-                else:
-                    start.enable()
+                # if self.car_index > 0 and self.algorithms[self.algorithm_index] == "DFS":
+                #     start.disable()
+                # else:
+                #     start.enable()
 
                 # Drawing the credits!
                 text_surf = credit_font.render("Developed by:", True, '#545454')
