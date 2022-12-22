@@ -110,19 +110,19 @@ class Button:
         :return: None
         """
 
+        self.disabled = True
         self.top_color = DST_COLOR
         self.bottom_color = DSB_COLOR
-        self.disabled = True
 
     def enable(self):
         """
         Enable the button turning it back to normal!
-        :return:
+        :return: None
         """
 
-        self.top_color = TOP_COLOR
-        self.bottom_color = BOT_COLOR
         self.disabled = False
+        # self.top_color = TOP_COLOR
+        # self.bottom_color = BOT_COLOR
 
     def draw(self) -> None:
         """
@@ -156,6 +156,9 @@ class Button:
 
         if not self.disabled:
 
+            self.top_color = TOP_COLOR
+            self.bottom_color = BOT_COLOR
+
             # Getting our mouse position!
             mouse_pos = pygame.mouse.get_pos()
 
@@ -179,6 +182,9 @@ class Button:
                         on_click_event(*args)
 
             else:
+                # self.top_color = DST_COLOR
+                # self.bottom_color = DSB_COLOR
+
                 # Setting elevation to original state.
                 self.dynamic_elevation = self.elevation
 

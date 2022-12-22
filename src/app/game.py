@@ -2,6 +2,7 @@ import os
 import pickle
 import subprocess
 import sys
+import threading
 
 import pygame
 
@@ -83,23 +84,32 @@ class Game:
         list_selection: list = getattr(self, where_list)
         index: int = getattr(self, where_index)
 
-        if index == 1:
-            setattr(self, where_index, 0)
-        else:
+        if index == 0:
             setattr(self, where_index, len(list_selection) - 1)
+        else:
+            setattr(self, where_index, index - 1)
 
     def start_handle(self):
 
         self.simulating = True
 
-    def compute_resolution(self):
+    def compute_resolution(self, threading_event: threading.Event, output: list):
 
         map_path = self.map_path + self.maps[self.map_index].lower().replace(" ", "_") + ".txt"
 
         algorithm = self.algorithms[self.algorithm_index]
         cars = self.cars[self.car_index]
 
-        return Simulator(map_path, algorithm, cars).get_resources()
+        print("COMPUTING!")
+
+        paths, tile_map = Simulator(map_path, algorithm, cars).get_resources()
+
+        print("DONE!")
+
+        output.append(paths)
+        output.append(tile_map)
+
+        threading_event.set()
 
     def run(self):
 
@@ -140,6 +150,7 @@ class Game:
         credit_font_smaller = pygame.font.Font(None, 15)
 
         running = False
+        processing = False
 
         while True:
 
@@ -167,8 +178,6 @@ class Game:
                             path_counter = 0
 
                         if event.key == pygame.K_RIGHT:
-
-                            print("Right")
 
                             for i in range(len(paths)):
                                 path = paths[i]
@@ -231,6 +240,7 @@ class Game:
                 next_car.draw()
 
                 # Drawing the selection of algorithms.
+
                 a_x, a_width = self.add_text(
                     self.algorithms[self.algorithm_index],
                     (self.width / 2, self.height / 2 + - 60 + 20 + 15)
@@ -241,6 +251,11 @@ class Game:
 
                 prev_alg.draw()
                 next_alg.draw()
+
+                if self.car_index > 0 and self.algorithms[self.algorithm_index] == "DFS":
+                    start.disable()
+                else:
+                    start.enable()
 
                 # Drawing the credits!
                 text_surf = credit_font.render("Developed by:", True, '#545454')
@@ -273,16 +288,33 @@ class Game:
 
             # If the start button is clicked, then we set the state to simulating,
             # and compute de result for the selected items. We also set the running state to True.
-            if self.simulating and not running:
+
+            if self.simulating:
 
                 if not running:
-                    paths, tile_map = self.compute_resolution()
-                    path_counter = 0
 
-                    running = True
+                    if not processing:
 
-                    self.screen = pygame.display.set_mode((tile_map.map_w, tile_map.map_h))
-                    self.screen.blit(tile_map.map_surface, (0, 0))
+                        results = []
+                        finish_event = threading.Event()
+
+                        thread = threading.Thread(target=self.compute_resolution, args=(finish_event, results))
+                        thread.start()
+
+                        path_counter = 0
+
+                        running = True
+                        processing = True
+
+                else:
+                    if finish_event.is_set():
+                        processing = False
+
+                        paths, tile_map = results[0], results[1]
+                        self.screen = pygame.display.set_mode((tile_map.map_w, tile_map.map_h))
+                        self.screen.blit(tile_map.map_surface, (0, 0))
+
+                        finish_event.clear()
 
             # Refreshing the screen (60 fps).
             pygame.display.update()
