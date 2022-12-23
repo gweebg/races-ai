@@ -103,11 +103,17 @@ def resolve_collisions(a_path_list: list[tuple[list[CircuitNode], int]], graph: 
 
                 neighbors_to, neighbors_from = igraph.get_all_associated(node)
                 for neigh, weight in neighbors_from:
+                    if neigh == node:
+                        continue
                     trans.add_edge(neigh, g_node, weight)
                     trans.remove_edge(neigh, node)
 
                 rem_pos_set = set()
                 for neigh, weight in neighbors_to:
+                    if neigh == node:
+                        trans.add_edge(g_node, g_node, weight)
+                        continue
+
                     trans.add_edge(g_node, neigh, weight)
                     for k in inds:
                         if k == j:
