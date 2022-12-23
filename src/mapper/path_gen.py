@@ -186,11 +186,12 @@ def generate_paths_graph(circuit: list[list[MapPiece]], start_pos_list: list[tup
 
         for (start_node, last_node, node_crashed, crash_node) in next_node_paths:
 
+            last_node.car.set_acc_zero()
             if last_node.piece == MapPiece.FINISH:
-                last_node.car.set_acc_zero()
                 last_node.car.set_vel_zero()
 
             if crash_node is not None:
+                crash_node.car.set_acc_zero()
                 graph.add_edge(node, crash_node, 25)
                 graph.add_edge(crash_node, last_node, 0)
 
