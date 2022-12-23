@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import time
 
 import pygame
 
@@ -103,11 +104,11 @@ class Game:
         algorithm = self.algorithms[self.algorithm_index]
         cars = self.cars[self.car_index]
 
-        print("COMPUTING!")
-
+        start_time = time.time()
         paths, tile_map = Simulator(map_path, algorithm, cars).get_resources()
+        stop_time = time.time()
 
-        print("DONE!")
+        print(f"Generated graph and path in {stop_time - start_time} seconds.")
 
         output.append(paths)
         output.append(tile_map)

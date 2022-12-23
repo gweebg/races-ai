@@ -262,10 +262,10 @@ class Graph:
                 graph.add_edge(node, adjacent_node, weight=weight)
 
         layout = nx.spring_layout(graph)
-        nx.draw_networkx(graph, layout, with_labels=True, font_weight='bold')
+        nx.draw_networkx(graph, layout, with_labels=False, node_size=5)
 
-        labels = nx.get_edge_attributes(graph, 'weight')
-        nx.draw_networkx_edge_labels(graph, layout, edge_labels=labels)
+        # labels = nx.get_edge_attributes(graph, 'weight')
+        # nx.draw_networkx_edge_labels(graph, layout, edge_labels=labels)
 
         plt.draw()
         plt.show()
