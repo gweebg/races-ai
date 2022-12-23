@@ -269,113 +269,84 @@ def expand_track_moves(circuit: list[list[MapPiece]], circuit_node: CircuitNode)
     if circuit_node.piece is MapPiece.FINISH:
         return list_paths
 
-    closed_set = set()
-
     # Up #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_up()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Down #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_down()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Left #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_left()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Right #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_right()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Top-Right #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_top_right()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Top-Left #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_top_left()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Down-Right #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_down_right()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Down-Left #
 
     node = copy.deepcopy(circuit_node)
     node.car.accel_down_left()
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     # Middle #
 
     node = copy.deepcopy(circuit_node)
-    node.car.update_vel()
 
     last_node, is_crashed, crash_node = get_node_path(circuit, node)
 
-    if last_node not in closed_set:
-        closed_set.add(last_node)
-        list_paths.append((node, last_node, is_crashed, crash_node))
+    list_paths.append((node, last_node, is_crashed, crash_node))
 
     return list_paths
