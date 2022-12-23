@@ -41,6 +41,12 @@ class Game:
             (245, 66, 236, 100),
             (255, 255, 255, 150)
         ]
+        self.car_color_names = [
+            "Red",
+            "Blue",
+            "Pink",
+            "White"
+        ]
 
         # Represents the state of the application, if it's running the simulation or not.
         self.simulating = False
@@ -198,6 +204,12 @@ class Game:
                                                          3)
 
                             path_counter += 1
+
+            if self.simulating and running and not processing:
+                for i in range(self.car_index + 1):
+                    w = tile_map.map_w - 50
+                    h = 20 * (1+i)
+                    self.add_text(f"{self.car_color_names[i]}: {paths[i][1]}", (w, h), "#FFFFFF")
 
             # Main Menu Display, if the simulation is not running!
             if not running:

@@ -69,18 +69,18 @@ def calc_heur(node: CircuitNode, finish_pos_list: list[tuple[int, int]]) -> floa
     return calc_manhatten_dist_heur((node.car.pos.x, node.car.pos.y), finish_pos_list)
 
 
-def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Graph, finish_nodes: list[CircuitNode],
+def resolve_collisions(a_path_list: list[tuple[list[CircuitNode], int]], graph: Graph, finish_nodes: list[CircuitNode],
                        algorithm: str) -> list[tuple[list[CircuitNode], int]]:
     assert graph.is_directed
-    immgraph_list = [ImmGraph.wrap_graph(graph) for i in range(len(path_list))]
-    ret_list = path_list.copy()
+    immgraph_list = [ImmGraph.wrap_graph(graph) for i in range(len(a_path_list))]
+    path_list = [path for path, cost in a_path_list]
 
     i = 0
     exit_b = False
     while not exit_b:
         inds = []
-        for j in range(len(ret_list)):
-            if len(ret_list[j][0]) > i + 1:
+        for j in range(len(path_list)):
+            if len(path_list[j]) > i + 1:
                 inds.append(j)
 
         if len(inds) == 0:
@@ -89,7 +89,7 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
 
         pos_map = {}
         for j in inds:
-            path = ret_list[j][0]
+            path = path_list[j]
             if path[i + 1].car.pos not in pos_map:
                 pos_map[path[i + 1].car.pos] = path[i]
             else:
@@ -112,44 +112,45 @@ def resolve_collisions(path_list: list[tuple[list[CircuitNode], int]], graph: Gr
                     for k in inds:
                         if k == j:
                             continue
-                        n_node = ret_list[k][0][i + 1]
+                        n_node = path_list[k][i + 1]
                         if n_node.car.pos == neigh.car.pos and n_node.car.pos not in rem_pos_set and node.piece != MapPiece.OUTSIDE_TRACK:
                             trans.remove_edge(node, neigh)
                             rem_pos_set.add(n_node.car.pos)
 
                 igraph = igraph.apply_transaction(trans)
                 s_path = None
-                cost = None
                 match algorithm:
                     case "DFS":
-                        s_path, cost = igraph.dfs_search(node, finish_nodes)
+                        s_path, _ = igraph.dfs_search(node, finish_nodes)
                     case "BFS":
-                        s_path, cost = igraph.bfs_search(node, finish_nodes)
+                        s_path, _ = igraph.bfs_search(node, finish_nodes)
                     case "A*":
-                        s_path, cost = igraph.a_star_search(node, finish_nodes)
+                        s_path, _ = igraph.a_star_search(node, finish_nodes)
                     case "Greedy":
-                        s_path, cost = igraph.greedy_search(node, finish_nodes)
+                        s_path, _ = igraph.greedy_search(node, finish_nodes)
                     case _:
                         raise RuntimeError(f"received unknown algo:{algorithm}")
 
                 n_path = []
-                n_cost = 0
 
-                for k in range(i):  # [1,2,3,4] [2,7,8] i=1; k=0 [1]; [1] + [2,7,8]
-                    if path[k] == node:
-                        path[k] = g_node
+                for k in range(i):
                     n_path.append(path[k])
 
-                s_path[0] = g_node
                 n_path += s_path
-                for k in range(1, i):
-                    n_cost += igraph.get_weight(n_path[k - 1], n_path[k])
 
-                ret_list[j] = (n_path, n_cost)
+                path_list[j] = n_path
                 immgraph_list[j] = igraph
 
         i += 1
 
+    ret_list = []
+    for path in path_list:
+        for node in path:
+            node.gen = 0 if node.gen != 0 else node.gen
+        weight = 0
+        for i in range(1, len(path)):
+            weight += graph.get_weight(path[i-1], path[i])
+        ret_list.append((path, weight))
     return ret_list
 
 
